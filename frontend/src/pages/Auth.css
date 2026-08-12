@@ -1,0 +1,290 @@
+/* Background styling for professional aesthetics */
+.login-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  padding: 40px 20px;
+  background: var(--bg-main);
+}
+
+/* 🔹 Layout Structure: Split-screen container */
+.split-container {
+  display: block;
+  position: relative;
+  z-index: 10;
+  width: 900px;
+  max-width: 100%;
+  min-height: 550px;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+/* 🔹 Left Section */
+.left-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  /* Modern Tech Gradient for left layer */
+  background: linear-gradient(145deg, #0f172a, #1e1b4b);
+  color: white;
+  z-index: 10;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-direction: column !important;
+  padding: 40px;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.left-panel::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(0,0,0,0) 50%);
+  animation: rotateGlow 20s linear infinite;
+}
+
+.left-panel h1 {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.4s ease;
+  z-index: 2;
+}
+
+.left-panel p {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: #cbd5e1;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+/* Base Wrapper for Right Hand side components */
+.right-panels-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: transparent;
+  z-index: 5;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 🔥 THE MAGICAL ANIMATION */
+.split-container.signup-active .left-panel {
+  transform: translateX(100%);
+}
+
+.split-container.signup-active .right-panels-wrapper {
+  transform: translateX(-100%);
+}
+
+/* 🔹 Right Section Specific Layouts */
+.form-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 30px 40px;
+  background: var(--bg-surface);
+  transition: opacity 0.4s ease-in-out, visibility 0.4s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.form-wrapper.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Elements Inside Forms */
+.form-wrapper h2 {
+  font-size: 28px;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Validation layout structure */
+.signup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px; /* 16px horizontal gap, 0 vertical gap since input-group has margin-bottom */
+  width: 100%;
+  max-width: 640px;
+}
+
+@media (max-width: 600px) {
+  .signup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-group {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.form-wrapper label {
+  display: block;
+  text-align: left;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.form-wrapper input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.form-wrapper input:focus {
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  outline: none;
+}
+
+/* Responsive Error Styling */
+.form-wrapper input.error-bound {
+  border-color: var(--danger);
+  background: #fef2f2;
+}
+
+.form-wrapper input.error-bound:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.error-msg {
+  color: var(--danger);
+  font-size: 11.5px;
+  margin-top: 4px;
+  min-height: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Forgot Password alignment specifically */
+.forgot-link {
+  font-size: 13px;
+  color: var(--primary);
+  text-align: left;
+  margin-top: -4px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  font-weight: 500;
+  width: 100%;
+  max-width: 320px;
+  transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
+.desc-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 24px;
+  max-width: 300px;
+}
+
+/* Button Upgrades */
+.form-wrapper button {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+}
+
+.form-wrapper button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(14, 165, 233, 0.3);
+}
+
+.form-wrapper button:active {
+  transform: translateY(0);
+}
+
+/* Text links below forms */
+.bottom-text {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.bottom-text a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.bottom-text a:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .split-container {
+    min-height: 800px;
+  }
+  .left-panel {
+    position: relative;
+    width: 100%;
+    height: 30%;
+    padding: 30px 20px;
+    transform: none !important;
+  }
+  .right-panels-wrapper {
+    position: relative;
+    width: 100%;
+    height: 70%;
+    transform: none !important;
+  }
+}
