@@ -55,7 +55,8 @@ exports.createComplaint = async (req, res) => {
       complaintId,
       userId: req.user.userId,
       userName: userObj ? userObj.name : 'Citizen',
-      status: 'Pending'
+      status: 'Submitted',
+      history: [{ status: 'Submitted', changedBy: 'Citizen' }]
     });
 
     // Real-time update via Socket.io
@@ -79,9 +80,20 @@ exports.updateComplaint = async (req, res) => {
       ? { $or: [{ complaintId: idParam }, { _id: idParam }] }
       : { complaintId: idParam };
 
+    const updateData = { $set: { ...req.body } };
+    
+    if (req.body.status) {
+      updateData.$push = {
+        history: {
+          status: req.body.status,
+          changedBy: req.user && req.user.role === 'admin' ? 'Admin' : (req.user && req.user.role === 'staff' ? 'Staff' : 'Citizen')
+        }
+      };
+    }
+
     const updated = await Complaint.findOneAndUpdate(
       query,
-      { $set: req.body },
+      updateData,
       { new: true }
     );
     if (!updated) return res.status(404).json({ error: 'Complaint not found' });

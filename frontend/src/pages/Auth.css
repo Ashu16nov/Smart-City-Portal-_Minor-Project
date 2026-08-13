@@ -130,9 +130,10 @@
 .signup-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 16px; /* 16px horizontal gap, 0 vertical gap since input-group has margin-bottom */
+  gap: 16px 20px; /* 20px horizontal gap, 16px vertical gap */
   width: 100%;
   max-width: 640px;
+  margin-bottom: 20px; /* Space between grid and button */
 }
 
 @media (max-width: 600px) {
@@ -146,22 +147,22 @@
   max-width: 320px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   position: relative;
 }
 
 .form-wrapper label {
   display: block;
   text-align: left;
-  margin-bottom: 4px;
-  font-weight: 500;
+  margin-bottom: 2px;
+  font-weight: 600;
   color: var(--text-primary);
   font-size: 13px;
 }
 
 .form-wrapper input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
@@ -287,4 +288,54 @@
     height: 70%;
     transform: none !important;
   }
+}
+
+/* Premium Profile Form Styling */
+.profile-form .input-group {
+  margin-bottom: 16px;
+}
+
+.profile-form .input-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.profile-form .input-group input[type="text"],
+.profile-form .input-group input[type="email"],
+.profile-form .input-group input[type="tel"],
+.profile-form .input-group input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: var(--bg-main, #ffffff);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.profile-form .input-group input:focus {
+  border-color: var(--primary, #0ea5e9);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Custom file upload styling for profile */
+.profile-file-upload {
+  display: inline-block;
+  padding: 10px 15px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--primary);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.profile-file-upload:hover {
+  background: rgba(14, 165, 233, 0.05);
 }

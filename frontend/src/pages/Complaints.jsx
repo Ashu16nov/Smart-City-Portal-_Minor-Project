@@ -14,6 +14,8 @@ const Complaints = () => {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0, rejected: 0, recentlyAdded: 0 });
   const [adminReason, setAdminReason] = useState('');
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
@@ -54,7 +56,7 @@ const Complaints = () => {
 
   const displayedComplaints = complaints.filter(c => {
     let matchStatus = true;
-    if (currentFilter === 'pending') matchStatus = (c.status === 'Pending' || c.status === 'In Progress');
+    if (currentFilter === 'active') matchStatus = ['Submitted', 'Under Review', 'Assigned', 'In Progress'].includes(c.status);
     else if (currentFilter === 'resolved') matchStatus = (c.status === 'Resolved' || c.status === 'Closed');
     else if (currentFilter !== 'all') matchStatus = (c.status && c.status.toLowerCase() === currentFilter);
 
@@ -90,7 +92,7 @@ const Complaints = () => {
     const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
     const newStats = {
       total: list.length,
-      pending: list.filter(c => c.status === 'Pending' || c.status === 'In Progress').length,
+      pending: list.filter(c => ['Submitted', 'Under Review', 'Assigned', 'In Progress'].includes(c.status)).length,
       resolved: list.filter(c => c.status === 'Resolved' || c.status === 'Closed').length,
       rejected: list.filter(c => c.status === 'Rejected').length,
       recentlyAdded: list.filter(c => new Date(c.createdAt) > twentyFourHoursAgo).length
@@ -152,6 +154,19 @@ const Complaints = () => {
     }
   };
 
+  const submitFeedback = async (complaintId) => {
+    try {
+      await api.put(`/complaints/update/${complaintId}`, { 
+        feedback: { rating: feedbackRating, comment: feedbackComment }
+      });
+      toast.success('Feedback submitted successfully!');
+      fetchMyComplaints();
+      setShowModal(false);
+    } catch (err) {
+      toast.error('Failed to submit feedback.');
+    }
+  };
+
   const handleDelete = async (complaintId) => {
     if (!window.confirm("Are you sure you want to permanently delete this complaint?")) return;
     try {
@@ -181,7 +196,7 @@ const Complaints = () => {
              <h3 style={{ margin: '0', fontSize: '24px', fontWeight: '900', color: '#006064' }}>{stats.total}</h3>
           </div>
           <div style={{ background: '#fff', padding: '15px 25px', borderRadius: '16px', border: '1px solid #80deea', boxShadow: '0 4px 10px rgba(0,188,212,0.1)' }}>
-             <p style={{ margin: '0 0 5px', fontSize: '12px', fontWeight: '800', color: '#ea580c', textTransform: 'uppercase' }}>Pending</p>
+             <p style={{ margin: '0 0 5px', fontSize: '12px', fontWeight: '800', color: '#ea580c', textTransform: 'uppercase' }}>Active / Pending</p>
              <h3 style={{ margin: '0', fontSize: '24px', fontWeight: '900', color: '#c2410c' }}>{stats.pending}</h3>
           </div>
           <div style={{ background: '#fff', padding: '15px 25px', borderRadius: '16px', border: '1px solid #80deea', boxShadow: '0 4px 10px rgba(0,188,212,0.1)' }}>
@@ -214,7 +229,7 @@ const Complaints = () => {
 
         {/* Global Filters */}
         <div style={{ background: '#ffffff', padding: '6px', borderRadius: '12px', border: '1px solid #b2ebf2', display: 'inline-flex', gap: '5px', boxShadow: '0 4px 6px rgba(0,188,212,0.15)' }}>
-          {['All', 'Pending', 'Resolved', 'Rejected'].map(btn => {
+          {['All', 'Active', 'Resolved', 'Rejected'].map(btn => {
              const lowerBtn = btn.toLowerCase();
              const isActive = currentFilter === lowerBtn;
              return (
@@ -247,7 +262,7 @@ const Complaints = () => {
               <div key={complaint._id} style={{ position: 'relative' }}>
                 <span style={{
                   position: 'absolute', top: '-12px', right: '20px', zIndex: '10',
-                  background: complaint.status === 'Pending' || complaint.status === 'In Progress' ? '#ea580c' : complaint.status === 'Resolved' || complaint.status === 'Closed' ? '#10b981' : '#ef4444',
+                  background: ['Submitted', 'Under Review', 'Assigned', 'In Progress'].includes(complaint.status) ? '#ea580c' : complaint.status === 'Resolved' || complaint.status === 'Closed' ? '#10b981' : '#ef4444',
                   color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', border: '3px solid white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                 }}>
                   {complaint.status.toUpperCase()}
@@ -393,9 +408,55 @@ const Complaints = () => {
                     </div>
                   )}
 
+                  {/* TIMELINE HISTORY */}
+                  {selectedComplaint.history && selectedComplaint.history.length > 0 && (
+                    <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: '20px' }}>
+                      <h4 style={{ margin: '0 0 10px', fontSize: '12px', fontWeight: '800', color: '#475569', textTransform: 'uppercase' }}>Status Timeline</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {selectedComplaint.history.map((h, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                            <span style={{ fontWeight: '700', color: '#1e293b' }}>{h.status} <span style={{ fontWeight: 'normal', color: '#94a3b8', fontSize: '11px' }}>({h.changedBy})</span></span>
+                            <span style={{ color: '#64748b' }}>{new Date(h.timestamp).toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CITIZEN ACTIONS: FEEDBACK & REOPEN */}
+                  {currentUser && currentUser.role !== 'admin' && selectedComplaint.status === 'Resolved' && (
+                    <div style={{ background: '#f0fdf4', padding: '20px', borderRadius: '16px', border: '1px solid #bbf7d0', marginTop: '20px' }}>
+                      <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: '800', color: '#166534' }}>Resolution Feedback</h4>
+                      {!selectedComplaint.feedback?.rating ? (
+                        <>
+                          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                            {[1,2,3,4,5].map(star => (
+                              <button key={star} onClick={() => setFeedbackRating(star)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', filter: star <= feedbackRating ? 'none' : 'grayscale(100%) opacity(30%)' }}>⭐</button>
+                            ))}
+                          </div>
+                          <textarea 
+                            value={feedbackComment}
+                            onChange={(e) => setFeedbackComment(e.target.value)}
+                            placeholder="Share your thoughts on the resolution..."
+                            style={{ width: '100%', height: '60px', padding: '10px', borderRadius: '10px', border: '1px solid #bbf7d0', fontSize: '13px', outline: 'none', resize: 'none', marginBottom: '10px' }}
+                          />
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <button onClick={() => submitFeedback(selectedComplaint.complaintId)} style={{ background: '#16a34a', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer', flex: 1 }}>Submit Feedback</button>
+                            <button onClick={() => handleUpdateStatus('Submitted')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}>Reopen Issue</button>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <p style={{ margin: '0 0 5px', fontSize: '14px', color: '#166534', fontWeight: '700' }}>Rating: {'⭐'.repeat(selectedComplaint.feedback.rating)}</p>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#15803d' }}>{selectedComplaint.feedback.comment}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* ADMIN ACTION PANEL MOVED TO LEFT */}
                   {currentUser && currentUser.role === 'admin' && (
-                    <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: 'auto' }}>
+                    <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: '20px' }}>
                       <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: '800', color: '#1e293b' }}>⚙️ Administrative Oversight</h4>
                       
                       <div style={{ marginBottom: '15px' }}>

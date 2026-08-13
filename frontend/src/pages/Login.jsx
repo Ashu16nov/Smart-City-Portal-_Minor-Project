@@ -6,7 +6,7 @@ import './Auth.css';
 const Login = () => {
   const [currentPanel, setCurrentPanel] = useState('login');
   const [isSignupActive, setIsSignupActive] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [loginRole, setLoginRole] = useState('user'); // 'user', 'admin', 'staff'
   const [leftContent, setLeftContent] = useState({
     heading: 'Secure Access Portal',
     desc: 'Manage your municipal reports and track civic resolutions with complete transparency.'
@@ -15,9 +15,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     loginUser: '',
     loginPass: '',
-    signupName: '',
     signupUsername: '',
-    signupPhone: '',
     signupEmail: '',
     signupPass: '',
     signupConfirm: '',
@@ -64,16 +62,18 @@ const Login = () => {
       });
       
       // Strict Role Verification
-      const targetRole = isAdminMode ? 'admin' : 'user';
-      if (response.data.user.role !== targetRole) {
-        setErrors({ loginUser: `Access Denied: Not an authorized ${targetRole} account.` });
+      if (response.data.user.role !== loginRole) {
+        setErrors({ loginUser: `Access Denied: Not an authorized ${loginRole} account.` });
         localStorage.clear(); // Clear any partial session
         return;
       }
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      window.location.href = response.data.user.role === 'admin' ? '/admin' : '/';
+      
+      if (response.data.user.role === 'admin') window.location.href = '/admin';
+      else if (response.data.user.role === 'staff') window.location.href = '/staff';
+      else window.location.href = '/';
     } catch (err) {
       setErrors({ loginUser: err.response?.data?.error || "Login failed. Please try again." });
     }
@@ -82,16 +82,12 @@ const Login = () => {
   const handleSignup = async (e) => {
     if (e) e.preventDefault();
     const newErrors = {};
-    const { signupName, signupUsername, signupPhone, signupEmail, signupPass, signupConfirm } = formData;
+    const { signupUsername, signupEmail, signupPass, signupConfirm } = formData;
     
-    const nameRegex = /^[a-zA-Z\s]+$/;
     const userRegex = /^[a-zA-Z0-9._]+$/;
-    const phoneRegex = /^\d{10}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!signupName || !signupName.trim() || !signupName.match(nameRegex)) newErrors.signupName = "Only letters and spaces allowed";
     if (!signupUsername || !signupUsername.trim() || !signupUsername.match(userRegex)) newErrors.signupUsername = "Letters, dots, and underscores only";
-    if (!signupPhone || !signupPhone.match(phoneRegex)) newErrors.signupPhone = "Enter exactly 10 digits";
     if (!signupEmail || !signupEmail.match(emailRegex)) newErrors.signupEmail = "Enter a valid email address";
     if (!signupPass || signupPass.length < 6) newErrors.signupPass = "Password must be at least 6 characters";
     if (signupPass !== signupConfirm) newErrors.signupConfirm = "Passwords do not match";
@@ -103,10 +99,8 @@ const Login = () => {
 
     try {
       const res = await api.post('/auth/signup', {
-        name: signupName.trim(),
         username: signupUsername.trim().toLowerCase(),
         email: signupEmail.trim(),
-        phone: signupPhone.trim(),
         password: signupPass
       });
       localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -117,40 +111,62 @@ const Login = () => {
     }
   };
 
-  const handleForgot = (e) => {
+  const handleForgot = async (e) => {
     e.preventDefault();
     if (!formData.forgotEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setErrors({ forgotEmail: "Valid email is required" });
-    } else {
+      return;
+    }
+    try {
+      await api.post('/auth/forgot-password', { email: formData.forgotEmail });
       routeToPanel('otp', "Two-Step Verification", "We require secondary authentication to protect your sensitive municipal data.", false);
+    } catch (err) {
+      setErrors({ forgotEmail: err.response?.data?.error || "Failed to send OTP." });
     }
   };
 
-  const handleOtp = (e) => {
+  const handleOtp = async (e) => {
     e.preventDefault();
     if (!formData.otpCode.match(/^\d{6}$/)) {
       setErrors({ otpCode: "Must be exactly 6 digits" });
-    } else {
+      return;
+    }
+    try {
+      await api.post('/auth/verify-otp', { email: formData.forgotEmail, otp: formData.otpCode });
       routeToPanel('reset', "Establish Security", "Deploy a strong, unique password to finalize your account recovery.", false);
+    } catch (err) {
+      setErrors({ otpCode: err.response?.data?.error || "Invalid OTP." });
     }
   };
 
-  const handleReset = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
     let passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
     if (!formData.resetNew.match(passRegex)) {
       setErrors({ resetNew: "Must contain upper, lower, digit, special char (min 8)" });
-    } else if (formData.resetNew !== formData.resetConfirm) {
+      return;
+    }
+    if (formData.resetNew !== formData.resetConfirm) {
       setErrors({ resetConfirm: "Passwords do not match" });
-    } else {
+      return;
+    }
+    
+    try {
+      await api.post('/auth/reset-password', { 
+        email: formData.forgotEmail, 
+        otp: formData.otpCode, 
+        newPassword: formData.resetNew 
+      });
       alert("Password updated successfully!");
       routeToPanel('login', "Secure Access Portal", "Manage your municipal reports and track civic resolutions with complete transparency.", false);
+    } catch (err) {
+      setErrors({ resetConfirm: err.response?.data?.error || "Failed to reset password." });
     }
   };
 
-  const toggleAdminMode = (e) => {
+  const handleRoleSwitch = (e, role) => {
     e.preventDefault();
-    setIsAdminMode(!isAdminMode);
+    setLoginRole(role);
   };
 
   return (
@@ -166,12 +182,14 @@ const Login = () => {
           
           {/* LOGIN PANEL */}
           <div className={`right-panel-login form-wrapper ${currentPanel === 'login' ? 'active' : ''}`}>
-            <h2 style={{ color: isAdminMode ? '#ef4444' : '#0d47a1' }}>{isAdminMode ? 'Admin Login' : 'Citizen Login'}</h2>
+            <h2 style={{ color: loginRole === 'admin' ? '#ef4444' : loginRole === 'staff' ? '#10b981' : '#0d47a1' }}>
+              {loginRole === 'admin' ? 'Admin Login' : loginRole === 'staff' ? 'Staff Login' : 'Citizen Login'}
+            </h2>
             <div className="input-group">
               <input 
                 type="text" 
                 id="loginUser" 
-                placeholder={isAdminMode ? "e.g. admin" : "e.g. Ashu"} 
+                placeholder={loginRole === 'admin' ? "e.g. admin" : loginRole === 'staff' ? "e.g. staff" : "e.g. Ashu"} 
                 className={errors.loginUser ? 'error-bound' : ''}
                 value={formData.loginUser}
                 onChange={handleInputChange}
@@ -183,7 +201,7 @@ const Login = () => {
               <input 
                 type="password" 
                 id="loginPass" 
-                placeholder={isAdminMode ? "e.g. Admin@123" : "e.g. Test@123"} 
+                placeholder={loginRole === 'admin' ? "e.g. Admin@123" : loginRole === 'staff' ? "e.g. Staff@123" : "e.g. Test@123"} 
                 className={errors.loginPass ? 'error-bound' : ''}
                 value={formData.loginPass}
                 onChange={handleInputChange}
@@ -195,26 +213,16 @@ const Login = () => {
             <button onClick={handleLogin}>Login to Portal</button>
             <p className="bottom-text">Don't have an account? <a href="#" onClick={() => routeToPanel('signup', "Join Our Community", "Empower your voice. Register today to seamlessly report and resolve municipal issues.", true)}>Create now</a></p>
             <p className="bottom-text">
-              <a href="#" onClick={toggleAdminMode} style={{ color: '#64748b', fontSize: '13px', fontWeight: 'bold' }}>
-                {isAdminMode ? 'Switch to Citizen Access' : 'Switch to Admin Command'}
-              </a>
+              <a href="#" onClick={(e) => handleRoleSwitch(e, 'user')} style={{ color: loginRole === 'user' ? '#0d47a1' : '#64748b', fontSize: '13px', fontWeight: 'bold', margin: '0 5px' }}>Citizen Access</a> | 
+              <a href="#" onClick={(e) => handleRoleSwitch(e, 'staff')} style={{ color: loginRole === 'staff' ? '#10b981' : '#64748b', fontSize: '13px', fontWeight: 'bold', margin: '0 5px' }}>Staff Portal</a> | 
+              <a href="#" onClick={(e) => handleRoleSwitch(e, 'admin')} style={{ color: loginRole === 'admin' ? '#ef4444' : '#64748b', fontSize: '13px', fontWeight: 'bold', margin: '0 5px' }}>Admin Command</a>
             </p>
           </div>
 
           {/* SIGNUP PANEL */}
           <div className={`right-panel-signup form-wrapper ${currentPanel === 'signup' ? 'active' : ''}`}>
-            <h2>Start Your Journey</h2>
-            <div className="signup-grid">
-              <div className="input-group">
-                <label htmlFor="signupName">Full Name</label>
-                <input type="text" id="signupName" placeholder="e.g. Ashu Kumar" className={errors.signupName ? 'error-bound' : ''} value={formData.signupName} onChange={handleInputChange} />
-                <span className="error-msg">{errors.signupName}</span>
-              </div>
-              <div className="input-group">
-                <label htmlFor="signupPhone">Phone Number</label>
-                <input type="tel" id="signupPhone" placeholder="e.g. 9876543210" className={errors.signupPhone ? 'error-bound' : ''} value={formData.signupPhone} onChange={handleInputChange} />
-                <span className="error-msg">{errors.signupPhone}</span>
-              </div>
+            <h2 style={{ marginBottom: '10px' }}>Start Your Journey</h2>
+            <div className="signup-vertical" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '5px' }}>
               <div className="input-group">
                 <label htmlFor="signupUsername">Username</label>
                 <input type="text" id="signupUsername" placeholder="e.g. Ashu" className={errors.signupUsername ? 'error-bound' : ''} value={formData.signupUsername} onChange={handleInputChange} />
@@ -236,7 +244,7 @@ const Login = () => {
                 <span className="error-msg">{errors.signupConfirm}</span>
               </div>
             </div>
-            <button onClick={handleSignup}>Create Account</button>
+            <button onClick={handleSignup} style={{ maxWidth: '320px', width: '100%', margin: '5px auto 0' }}>Create Account</button>
             <p className="bottom-text">Already have an account? <a href="#" onClick={() => routeToPanel('login', "Secure Access Portal", "Manage your municipal reports and track civic resolutions with complete transparency.", false)}>Login here</a></p>
           </div>
 

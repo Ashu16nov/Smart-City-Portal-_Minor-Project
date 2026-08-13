@@ -6,7 +6,9 @@ const path = require('path');
 const JWT_SECRET = process.env.JWT_SECRET || 'MunicipalSuperSecretKey123!@#';
 const usersFilePath = path.join(__dirname, '..', 'users.json');
 
-// Helper functions for users.json
+// In-memory OTP store for development (email -> { otp, expiresAt })
+const otpStore = {};
+
 const readUsers = () => {
   if (!fs.existsSync(usersFilePath)) return [];
   const data = fs.readFileSync(usersFilePath);
@@ -20,8 +22,8 @@ const writeUsers = (users) => {
 exports.signup = async (req, res) => {
   try {
     const { name, username, password, email, phone } = req.body;
-    if (!name || !username || !password)
-      return res.status(400).json({ error: 'Name, username and password are required' });
+    if (!username || !password)
+      return res.status(400).json({ error: 'Username and password are required' });
 
     const users = readUsers();
     const exists = users.find(u => u.username === username || u.email === email);
@@ -32,12 +34,22 @@ exports.signup = async (req, res) => {
     const newUser = {
       _id: userId,
       id: userId,
-      name,
+      name: name || username,
       username,
       password: hashedPassword,
       email: email || '',
       phone: phone || '',
-      role: 'user'
+      role: 'user',
+      // Extended Profile Fields
+      address: '',
+      city: '',
+      profilePhoto: '',
+      createdAt: new Date().toISOString(),
+      isActive: true,
+      notifications: {
+        email: true,
+        sms: true
+      }
     };
 
     users.push(newUser);
@@ -60,6 +72,7 @@ exports.login = async (req, res) => {
     const user = users.find(u => u.username === username || u.email === username);
     
     if (!user) return res.status(401).json({ error: 'User not found. Please signup first.' });
+    if (!user.isActive) return res.status(403).json({ error: 'Your account has been deactivated by an Administrator.' });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid password.' });
@@ -83,5 +96,66 @@ exports.getMe = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+};
+
+// Password Recovery Flows
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const users = readUsers();
+    const user = users.find(u => u.email === email);
+    if (!user) return res.status(404).json({ error: 'No account associated with this email.' });
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore[email] = {
+      otp,
+      expiresAt: Date.now() + 10 * 60 * 1000 // 10 mins
+    };
+
+    // Print OTP to terminal for dev purposes
+    console.log(`\n\n[DEV NOTIFICATION] OTP for ${email} is: ${otp}\n\n`);
+
+    res.json({ message: 'OTP sent successfully (Check server console)' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to process forgot password request.' });
+  }
+};
+
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const record = otpStore[email];
+
+    if (!record) return res.status(400).json({ error: 'No OTP request found for this email.' });
+    if (Date.now() > record.expiresAt) return res.status(400).json({ error: 'OTP has expired.' });
+    if (record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP.' });
+
+    res.json({ message: 'OTP Verified successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to verify OTP.' });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const record = otpStore[email];
+
+    if (!record || record.otp !== otp) return res.status(400).json({ error: 'Invalid or expired OTP session.' });
+
+    const users = readUsers();
+    const userIndex = users.findIndex(u => u.email === email);
+    if (userIndex === -1) return res.status(404).json({ error: 'User not found.' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    users[userIndex].password = hashedPassword;
+    writeUsers(users);
+
+    delete otpStore[email]; // Clear OTP
+    res.json({ message: 'Password has been reset successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset password.' });
   }
 };

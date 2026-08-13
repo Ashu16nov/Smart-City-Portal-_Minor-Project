@@ -1,7 +1,7 @@
 // ─── DNS Override ────────
-// const dns = require('dns');
-// dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
-// dns.setDefaultResultOrder('ipv4first');
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+dns.setDefaultResultOrder('ipv4first');
 
 require('dotenv').config();
 const express = require('express');
@@ -86,6 +86,7 @@ app.use('/api/complaints', require('./routes/complaintRoutes'));
 app.use('/api/feedbacks', require('./routes/feedbackRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/services', require('./routes/serviceRoutes'));
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 const http = require('http');

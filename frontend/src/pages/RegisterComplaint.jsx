@@ -74,19 +74,24 @@ const RegisterComplaint = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', padding: '60px 20px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
-      <div className="form-container" style={{ margin: 0, width: '100%', maxWidth: '850px' }}>
-        <ToastContainer />
-        <div className="form-header">
-          <h2>Log an Issue</h2>
-          <p>Submit your infrastructure or service requests directly to the Smart City Authority.</p>
-        </div>
+    <div className="dashboard-wrapper" style={{ minHeight: '100vh', background: '#e0f7fa', position: 'relative' }}>
+      <ToastContainer position="top-right" autoClose={3000} />
+      
+      {/* HEADER SECTION */}
+      <div style={{ padding: '60px 60px 40px 60px', textAlign: 'center', background: '#b2ebf2', borderBottom: '1px solid #80deea', marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#006064', margin: '0 0 15px 0' }}>Log an Issue</h1>
+        <p style={{ fontSize: '16px', color: '#00838f', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
+          Submit your infrastructure or service requests directly to the Smart City Authority.
+        </p>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', paddingBottom: '60px' }}>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-section">
-            <h3 className="section-title">📍 Geographical Metrics</h3>
-            <div className="form-grid">
-              <div className="form-group">
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '16px', margin: '25px 0 15px', padding: '20px 25px' }}>
+            <h3 style={{ color: '#166534', borderBottom: '2px dashed #bbf7d0', paddingBottom: '10px', marginBottom: '15px', fontSize: '18px', fontWeight: '800' }}>📍 Geographical Metrics</h3>
+            <div className="form-grid" style={{ gap: '15px' }}>
+              <div className="form-group" style={{ marginBottom: '15px' }}>
                 <label htmlFor="district">Administrative Zone <span style={{ color: 'red' }}>*</span></label>
                 <select id="district" value={formData.district} onChange={handleInputChange} required>
                   <option value="" disabled>Select Zone</option>
@@ -97,7 +102,7 @@ const RegisterComplaint = () => {
                   <option value="Central District">Central District</option>
                 </select>
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: '15px' }}>
                 <label htmlFor="ward">Sector / Ward <span style={{ color: 'red' }}>*</span></label>
                 <select id="ward" value={formData.ward} onChange={handleInputChange} required>
                   <option value="" disabled>Select Sector</option>
@@ -107,7 +112,7 @@ const RegisterComplaint = () => {
                 </select>
               </div>
             </div>
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '5px' }}>
               <label htmlFor="location">Precise Location <span style={{ color: 'red' }}>*</span></label>
               <input 
                 type="text" 
@@ -120,33 +125,39 @@ const RegisterComplaint = () => {
             </div>
           </div>
 
-          <div className="form-section">
-            <h3 className="section-title">⚠️ Incident Details</h3>
-            <div className="form-group">
-              <label htmlFor="category">Service Category <span style={{ color: 'red' }}>*</span></label>
-              <select id="category" value={formData.category} onChange={handleInputChange} required>
-                <option value="" disabled>Select Category</option>
-                <option value="Waste Management">♻️ Waste Management</option>
-                <option value="Sanitation & Drainage">💧 Sanitation & Drainage</option>
-                <option value="Infrastructure Maintenance">🛣️ Infrastructure Maintenance</option>
-                <option value="Water Supply">🚰 Water Supply Operations</option>
-                <option value="Lighting & Energy">💡 Lighting & Energy Systems</option>
-                <option value="Public Safety">🛡️ Public Safety</option>
-                <option value="Others">❓ Other</option>
-              </select>
+          <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', margin: '0 0 15px', padding: '20px 25px' }}>
+            <h3 style={{ color: '#b45309', borderBottom: '2px dashed #fde68a', paddingBottom: '10px', marginBottom: '15px', fontSize: '18px', fontWeight: '800' }}>⚠️ Incident Details</h3>
+            <div className="form-grid" style={{ gap: '15px' }}>
+              <div className="form-group" style={{ marginBottom: '15px' }}>
+                <label htmlFor="category">Service Category <span style={{ color: 'red' }}>*</span></label>
+                <select id="category" value={formData.category} onChange={handleInputChange} required>
+                  <option value="" disabled>Select Category</option>
+                  <option value="Road & Potholes">🛣️ Road & Potholes</option>
+                  <option value="Street Lights">💡 Street Lights</option>
+                  <option value="Garbage/Waste">🗑️ Garbage/Waste</option>
+                  <option value="Water Supply">🚰 Water Supply</option>
+                  <option value="Drainage">💧 Drainage</option>
+                  <option value="Electricity">⚡ Electricity</option>
+                  <option value="Traffic">🚦 Traffic</option>
+                  <option value="Public Safety">🛡️ Public Safety</option>
+                  <option value="Parks">🏞️ Parks</option>
+                  <option value="Sewage">🚾 Sewage</option>
+                  <option value="Other">❓ Other</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: '15px' }}>
+                <label htmlFor="title">Incident Title <span style={{ color: 'red' }}>*</span></label>
+                <input 
+                  type="text" 
+                  id="title" 
+                  placeholder="Brief summary of the issue..." 
+                  value={formData.title} 
+                  onChange={handleInputChange} 
+                  required 
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="title">Incident Title <span style={{ color: 'red' }}>*</span></label>
-              <input 
-                type="text" 
-                id="title" 
-                placeholder="Brief summary of the issue..." 
-                value={formData.title} 
-                onChange={handleInputChange} 
-                required 
-              />
-            </div>
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '5px' }}>
               <label htmlFor="description">Comprehensive Description <span style={{ color: 'red' }}>*</span></label>
               <textarea 
                 id="description" 
@@ -159,9 +170,9 @@ const RegisterComplaint = () => {
             </div>
           </div>
 
-          <div className="form-section">
-            <h3 className="section-title">📸 Supporting Media</h3>
-            <div className="form-group">
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '16px', margin: '0 0 15px', padding: '20px 25px' }}>
+            <h3 style={{ color: '#1e3a8a', borderBottom: '2px dashed #bfdbfe', paddingBottom: '10px', marginBottom: '15px', fontSize: '18px', fontWeight: '800' }}>📸 Supporting Media</h3>
+            <div className="form-group" style={{ marginBottom: '5px' }}>
               <div className="upload-container" style={{ background: 'var(--bg-main)', border: '2px dashed var(--border-color)', borderRadius: '12px', padding: '15px' }}>
                 <label htmlFor="images" className="custom-file-upload" style={{ background: 'var(--primary)', border: 'none' }}>
                   <span>Upload Image</span>
@@ -175,7 +186,7 @@ const RegisterComplaint = () => {
           </div>
 
           <div style={{ padding: '0 40px 40px' }}>
-            <button type="submit" className="submit-btn" disabled={loading} style={{ width: '100%', maxWidth: 'none', marginTop: '20px' }}>
+            <button type="submit" className="submit-btn" disabled={loading} style={{ width: '100%', maxWidth: '300px', margin: '40px auto 0', display: 'block' }}>
               {loading ? "Processing Request..." : "Submit Incident Report"}
             </button>
           </div>

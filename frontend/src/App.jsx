@@ -10,7 +10,8 @@ import Complaints from './pages/Complaints';
 import Feedback from './pages/Feedback';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-
+import PublicServices from './pages/PublicServices';
+import AdminServices from './pages/AdminServices';
 function App() {
   const [user, setUser] = React.useState(null);
 
@@ -47,6 +48,8 @@ function App() {
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/services" element={<PublicServices />} />
+            <Route path="/admin/services" element={<AdminServices />} />
           </Routes>
         </main>
         <Footer />
