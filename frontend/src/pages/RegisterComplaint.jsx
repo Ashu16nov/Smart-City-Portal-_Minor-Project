@@ -11,10 +11,13 @@ const RegisterComplaint = () => {
     location: '',
     title: '',
     description: '',
-    category: ''
+    category: '',
+    latitude: null,
+    longitude: null
   });
   const [image, setImage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +43,26 @@ const RegisterComplaint = () => {
     }
   };
 
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition((position) => {
+      setFormData(prev => ({
+        ...prev,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        location: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`
+      }));
+      setLocating(false);
+    }, () => {
+      alert("Unable to retrieve your location. Please check browser permissions.");
+      setLocating(false);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -51,6 +74,8 @@ const RegisterComplaint = () => {
         district: formData.district,
         ward: formData.ward,
         location: formData.location,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         image: image
       };
 
@@ -64,7 +89,7 @@ const RegisterComplaint = () => {
       });
 
       // Clear form
-      setFormData({ district: '', ward: '', location: '', title: '', description: '', category: '' });
+      setFormData({ district: '', ward: '', location: '', title: '', description: '', category: '', latitude: null, longitude: null });
       setImage('');
     } catch (err) {
       toast.error('Error: ' + (err.response?.data?.error || 'Failed to submit request'));
@@ -113,16 +138,27 @@ const RegisterComplaint = () => {
                 </select>
               </div>
             </div>
-            <div className="form-group" style={{ marginBottom: '5px' }}>
-              <label htmlFor="location">Precise Location <span style={{ color: 'red' }}>*</span></label>
-              <input 
-                type="text" 
-                id="location" 
-                placeholder="e.g. Flat 402 or Main Lobby" 
-                value={formData.location} 
-                onChange={handleInputChange} 
-                required 
-              />
+            <div style={{ marginBottom: '20px', position: 'relative' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontWeight: 'bold' }}>Specific Location <span style={{ color: 'red' }}>*</span></label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input 
+                  type="text"
+                  id="location"
+                  placeholder="e.g. Flat 402 or Main Lobby"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  required
+                  style={{ flex: 1, padding: '12px 15px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none' }}
+                />
+                <button 
+                  type="button" 
+                  onClick={handleGetLocation}
+                  disabled={locating}
+                  style={{ padding: '12px 20px', borderRadius: '10px', border: 'none', background: '#e0f2fe', color: '#0ea5e9', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                >
+                  {locating ? 'Locating...' : '📍 GPS'}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -10,16 +10,22 @@ const generateComplaintId = () => {
 
 exports.getComplaints = async (req, res) => {
   try {
-    console.log(`🔍 Fetching complaints for role: ${req.user.role}, userId: ${req.user.userId}`);
-    const query = req.user.role === 'admin' ? {} : { userId: req.user.userId };
+    let query = {};
+    if (req.user.role === 'user') {
+      query = { userId: req.user.userId };
+    } else if (req.user.role === 'department') {
+      query = { assignedDepartmentId: req.user.id };
+    } else if (req.user.role === 'staff') {
+      query = { assignedStaffId: req.user.id };
+    }
+    // Admin gets all complaints (query = {})
+
     const complaints = await Complaint.find(query)
       .select('-image')
       .sort({ _id: -1 })
       .limit(100);
-    console.log(`📊 Found ${complaints.length} complaints`);
     res.json(complaints);
   } catch (err) {
-    console.error('❌ Error fetching complaints:', err);
     res.status(500).json({ error: 'Failed to fetch complaints' });
   }
 };
@@ -51,13 +57,42 @@ exports.createComplaint = async (req, res) => {
     const User = require('../models/User');
     const userObj = await User.findById(req.user.userId);
     const complaintId = generateComplaintId();
+    
+    // 1. Priority Logic
+    const text = `${req.body.category} ${req.body.title} ${req.body.description}`.toLowerCase();
+    let priority = 'Medium';
+    if (text.match(/leakage|fire|damage|safety|danger|emergency|hazard|severe|critical|urgent/)) {
+      priority = 'High';
+    } else if (text.match(/minor|suggestion|feedback|query/)) {
+      priority = 'Low';
+    }
+
+    // 2. SLA Logic
+    const slaDays = priority === 'High' ? 1 : priority === 'Medium' ? 3 : 7;
+    const slaDeadline = new Date();
+    slaDeadline.setDate(slaDeadline.getDate() + slaDays);
+
+    // 3. Auto-Routing Logic
+    // E.g., if category is "Road", look for a Department named "Road Department" or containing "Road"
+    const dept = await User.findOne({ role: 'department', name: new RegExp(req.body.category, 'i') });
+    let assignedDepartmentId = undefined;
+    let initialStatus = 'Submitted';
+    
+    if (dept) {
+      assignedDepartmentId = dept._id.toString();
+      initialStatus = 'Assigned'; // Automatically skip to Assigned
+    }
+
     const complaint = await Complaint.create({
       ...req.body,
       complaintId,
       userId: req.user.userId,
       userName: userObj ? userObj.name : 'Citizen',
-      status: 'Submitted',
-      history: [{ status: 'Submitted', changedBy: 'Citizen' }]
+      status: initialStatus,
+      priority,
+      slaDeadline,
+      assignedDepartmentId,
+      history: [{ status: initialStatus, changedBy: 'Citizen' }]
     });
 
     // Real-time update via Socket.io
@@ -96,7 +131,7 @@ exports.updateComplaint = async (req, res) => {
       updateData.$push = {
         history: {
           status: req.body.status,
-          changedBy: req.user && req.user.role === 'admin' ? 'Admin' : (req.user && req.user.role === 'staff' ? 'Staff' : 'Citizen')
+          changedBy: req.user ? (req.user.role.charAt(0).toUpperCase() + req.user.role.slice(1)) : 'System'
         }
       };
     }

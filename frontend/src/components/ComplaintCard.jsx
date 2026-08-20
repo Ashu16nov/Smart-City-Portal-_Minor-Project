@@ -38,9 +38,20 @@ const ComplaintCard = ({ complaint, onDetails, isAdmin }) => {
               }}>
            {status}
         </span>
-        <span className="date-pill" style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
-          {new Date(createdAt).toLocaleDateString()}
-        </span>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {complaint.priority && (
+            <span style={{ 
+              fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', padding: '3px 6px', borderRadius: '4px',
+              background: complaint.priority === 'High' ? '#fee2e2' : complaint.priority === 'Medium' ? '#fef3c7' : '#e0f2fe',
+              color: complaint.priority === 'High' ? '#991b1b' : complaint.priority === 'Medium' ? '#92400e' : '#0369a1' 
+            }}>
+              {complaint.priority}
+            </span>
+          )}
+          <span className="date-pill" style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
+            {new Date(createdAt).toLocaleDateString()}
+          </span>
+        </div>
       </div>
       
       <div style={{ padding: '0 16px 16px' }}>

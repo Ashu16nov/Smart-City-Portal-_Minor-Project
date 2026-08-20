@@ -26,6 +26,19 @@
   --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
 }
 
+body.dark-mode {
+  --bg-main: #0f172a;
+  --bg-surface: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --glass-border: rgba(51, 65, 85, 0.4);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
 /* Reset */
 * {
   margin: 0;
@@ -228,7 +241,7 @@ body {
 }
 
 .dark {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   max-width: 100%;

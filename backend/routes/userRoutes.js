@@ -4,7 +4,7 @@ const userController = require('../controllers/userController');
 const authenticateToken = require('../middleware/authMiddleware');
 
 router.get('/', authenticateToken, userController.getUsers);
-router.post('/staff', authenticateToken, userController.createStaff);
+router.post('/create', authenticateToken, userController.createUser);
 router.patch('/:id/profile', authenticateToken, userController.updateProfile);
 router.patch('/:id/password', authenticateToken, userController.changePassword);
 router.patch('/:id/status', authenticateToken, userController.toggleActiveStatus);

@@ -10,7 +10,10 @@ import Complaints from './pages/Complaints';
 import Feedback from './pages/Feedback';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import DepartmentDashboard from './pages/DepartmentDashboard';
+import StaffDashboard from './pages/StaffDashboard';
 import PublicServices from './pages/PublicServices';
+import NearbyServices from './pages/NearbyServices';
 import AdminServices from './pages/AdminServices';
 import Emergency from './pages/Emergency';
 import Announcements from './pages/Announcements';
@@ -79,7 +82,10 @@ function App() {
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/department" element={(user && user.role === 'department') ? <DepartmentDashboard /> : <Login />} />
+            <Route path="/staff" element={(user && user.role === 'staff') ? <StaffDashboard /> : <Login />} />
             <Route path="/services" element={<PublicServices />} />
+            <Route path="/nearby" element={<NearbyServices />} />
             <Route path="/admin/services" element={<AdminServices />} />
             <Route path="/emergency" element={<Emergency />} />
             <Route path="/announcements" element={<Announcements />} />

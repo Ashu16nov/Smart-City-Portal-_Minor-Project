@@ -1,24 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
 const NotificationService = require('../services/notificationService');
+const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'MunicipalSuperSecretKey123!@#';
-const usersFilePath = path.join(__dirname, '..', 'users.json');
 
 // In-memory OTP store for development (email -> { otp, expiresAt })
 const otpStore = {};
-
-const readUsers = () => {
-  if (!fs.existsSync(usersFilePath)) return [];
-  const data = fs.readFileSync(usersFilePath);
-  return JSON.parse(data);
-};
-
-const writeUsers = (users) => {
-  fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-};
 
 exports.signup = async (req, res) => {
   try {
@@ -26,14 +14,13 @@ exports.signup = async (req, res) => {
     if (!username || !password)
       return res.status(400).json({ error: 'Username and password are required' });
 
-    const users = readUsers();
-    const exists = users.find(u => u.username === username || u.email === email);
+    const exists = await User.findOne({ $or: [{ username }, { email }] });
     if (exists) return res.status(409).json({ error: 'Username or email already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = `user-${Date.now()}`;
-    const newUser = {
-      _id: userId,
+    
+    const newUser = await User.create({
       id: userId,
       name: name || username,
       username,
@@ -41,23 +28,11 @@ exports.signup = async (req, res) => {
       email: email || '',
       phone: phone || '',
       role: 'user',
-      // Extended Profile Fields
-      address: '',
-      city: '',
-      profilePhoto: '',
-      createdAt: new Date().toISOString(),
-      isActive: true,
-      notifications: {
-        email: true,
-        sms: true
-      }
-    };
-
-    users.push(newUser);
-    writeUsers(users);
+      isActive: true
+    });
 
     const token = jwt.sign({ userId: newUser._id, id: newUser.id, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
-    const { password: _, ...safeUser } = newUser;
+    const { password: _, ...safeUser } = newUser.toObject();
     
     // Send Notification
     const io = req.app.get('socketio');
@@ -79,9 +54,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const users = readUsers();
-    
-    const user = users.find(u => u.username === username || u.email === username);
+    const user = await User.findOne({ $or: [{ username }, { email: username }] });
     
     if (!user) return res.status(401).json({ error: 'User not found. Please signup first.' });
     if (!user.isActive) return res.status(403).json({ error: 'Your account has been deactivated by an Administrator.' });
@@ -89,8 +62,8 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid password.' });
 
-    const token = jwt.sign({ userId: user._id, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    const { password: _, ...safeUser } = user;
+    const token = jwt.sign({ userId: user._id, id: user.id, role: user.role, departmentName: user.departmentName }, JWT_SECRET, { expiresIn: '7d' });
+    const { password: _, ...safeUser } = user.toObject();
     res.json({ message: 'Login successful', token, user: safeUser });
   } catch (err) {
     console.error(err);
@@ -100,10 +73,9 @@ exports.login = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    const users = readUsers();
-    const user = users.find(u => u.id === req.user.id);
+    const user = await User.findOne({ id: req.user.id });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    const { password: _, ...safeUser } = user;
+    const { password: _, ...safeUser } = user.toObject();
     res.json(safeUser);
   } catch (err) {
     console.error(err);
@@ -115,8 +87,7 @@ exports.getMe = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const users = readUsers();
-    const user = users.find(u => u.email === email);
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: 'No account associated with this email.' });
 
     // Generate 6 digit OTP
@@ -167,13 +138,12 @@ exports.resetPassword = async (req, res) => {
 
     if (!record || record.otp !== otp) return res.status(400).json({ error: 'Invalid or expired OTP session.' });
 
-    const users = readUsers();
-    const userIndex = users.findIndex(u => u.email === email);
-    if (userIndex === -1) return res.status(404).json({ error: 'User not found.' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    users[userIndex].password = hashedPassword;
-    writeUsers(users);
+    user.password = hashedPassword;
+    await user.save();
 
     delete otpStore[email]; // Clear OTP
 

@@ -157,9 +157,10 @@ const Complaints = () => {
   const submitFeedback = async (complaintId) => {
     try {
       await api.put(`/complaints/update/${complaintId}`, { 
+        status: 'Closed',
         feedback: { rating: feedbackRating, comment: feedbackComment }
       });
-      toast.success('Feedback submitted successfully!');
+      toast.success('Feedback submitted and complaint closed successfully!');
       fetchMyComplaints();
       setShowModal(false);
     } catch (err) {
@@ -327,11 +328,17 @@ const Complaints = () => {
                             onChange={(e) => handleUpdateStatus(c.complaintId, e.target.value)}
                             style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
                           >
-                             <option value="Pending">Set Pending</option>
-                             <option value="In Progress">Set In Progress</option>
-                             <option value="Resolved">Set Resolved</option>
-                             <option value="Rejected">Set Rejected</option>
-                             <option value="Closed">Archive/Close</option>
+                             <option value="Submitted">Submitted</option>
+                             <option value="Under Verification">Under Verification</option>
+                             <option value="Assigned">Assigned</option>
+                             <option value="Accepted">Accepted</option>
+                             <option value="In Progress">In Progress</option>
+                             <option value="Resolved">Resolved</option>
+                             <option value="Citizen Verification">Citizen Verification</option>
+                             <option value="Closed">Closed</option>
+                             <option value="Rejected">Rejected</option>
+                             <option value="Reopened">Reopened</option>
+                             <option value="Escalated">Escalated</option>
                           </select>
                           <button 
                             onClick={() => handleDelete(c.complaintId)}
@@ -441,8 +448,8 @@ const Complaints = () => {
                             style={{ width: '100%', height: '60px', padding: '10px', borderRadius: '10px', border: '1px solid #bbf7d0', fontSize: '13px', outline: 'none', resize: 'none', marginBottom: '10px' }}
                           />
                           <div style={{ display: 'flex', gap: '10px' }}>
-                            <button onClick={() => submitFeedback(selectedComplaint.complaintId)} style={{ background: '#16a34a', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer', flex: 1 }}>Submit Feedback</button>
-                            <button onClick={() => handleUpdateStatus('Submitted')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}>Reopen Issue</button>
+                            <button onClick={() => submitFeedback(selectedComplaint.complaintId)} style={{ background: '#16a34a', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer', flex: 1 }}>Verify & Close</button>
+                            <button onClick={() => handleUpdateStatus('Reopened')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}>Not Satisfied (Reopen)</button>
                           </div>
                         </>
                       ) : (
@@ -495,18 +502,34 @@ const Complaints = () => {
                   )}
                 </div>
 
-                {/* RIGHT: IMAGE ONLY (Fills full height) */}
-                <div style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'block' }}>Evidence Archive</label>
-                  <div style={{ background: '#f1f5f9', borderRadius: '20px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                    {selectedComplaint.image ? (
-                      <img src={selectedComplaint.image} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontSize: '50px', opacity: '0.1' }}>🖼️</div>
-                         <p style={{ color: '#94a3b8', fontSize: '12px', fontStyle: 'italic', marginTop: '10px' }}>Non-visual disclosure</p>
-                      </div>
-                    )}
+                {/* RIGHT: EVIDENCE (Before / After) */}
+                <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'block' }}>Before (Citizen Evidence)</label>
+                    <div style={{ background: '#f1f5f9', borderRadius: '20px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #e2e8f0', minHeight: '150px' }}>
+                      {selectedComplaint.image ? (
+                        <img src={selectedComplaint.image} alt="Before" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ textAlign: 'center' }}>
+                           <div style={{ fontSize: '30px', opacity: '0.1' }}>🖼️</div>
+                           <p style={{ color: '#94a3b8', fontSize: '10px', fontStyle: 'italic', marginTop: '5px' }}>None provided</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'block' }}>After (Resolution Proof)</label>
+                    <div style={{ background: '#f1f5f9', borderRadius: '20px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid #e2e8f0', minHeight: '150px' }}>
+                      {selectedComplaint.resolutionProof ? (
+                        <img src={selectedComplaint.resolutionProof} alt="After" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ textAlign: 'center' }}>
+                           <div style={{ fontSize: '30px', opacity: '0.1' }}>📸</div>
+                           <p style={{ color: '#94a3b8', fontSize: '10px', fontStyle: 'italic', marginTop: '5px' }}>Pending resolution</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
             </div>

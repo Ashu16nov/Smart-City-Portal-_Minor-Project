@@ -1,69 +1,47 @@
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
+const User = require('../models/User');
 
-const usersFilePath = path.join(__dirname, '..', 'users.json');
-
-const readUsers = () => {
-  if (!fs.existsSync(usersFilePath)) return [];
-  const data = fs.readFileSync(usersFilePath);
-  return JSON.parse(data);
-};
-
-const writeUsers = (users) => {
-  fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-};
-
-// Admin: Create Staff Account
-exports.createStaff = async (req, res) => {
+// Admin: Create Department Head or Staff Account
+exports.createUser = async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
-    const { name, username, email, password, department } = req.body;
-    if (!name || !username || !password || !department) {
+    const { name, username, email, password, role, departmentName } = req.body;
+    if (!name || !username || !password || !role) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const users = readUsers();
-    const exists = users.find(u => u.username === username || (email && u.email === email));
+    const exists = await User.findOne({ $or: [{ username }, { email }] });
     if (exists) return res.status(409).json({ error: 'Username or email already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = `staff-${Date.now()}`;
-    const newUser = {
-      _id: userId,
+    const userId = `${role}-${Date.now()}`;
+    
+    const newUser = await User.create({
       id: userId,
       name,
       username,
       password: hashedPassword,
       email: email || '',
       phone: '',
-      role: 'staff',
-      department,
-      createdAt: new Date().toISOString(),
-      isActive: true,
-      notifications: { email: true, sms: false }
-    };
+      role, // 'department' or 'staff'
+      departmentName: departmentName || '',
+      isActive: true
+    });
 
-    users.push(newUser);
-    writeUsers(users);
-
-    const { password: _, ...safeUser } = newUser;
-    res.status(201).json({ message: 'Staff credential generated', user: safeUser });
+    const { password: _, ...safeUser } = newUser.toObject();
+    res.status(201).json({ message: 'Credential generated', user: safeUser });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to create staff credential' });
+    res.status(500).json({ error: 'Failed to create credential' });
   }
 };
 
-// Admin: Get all users
+// Admin/Department: Get all users
 exports.getUsers = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
-    
-    const users = readUsers();
-    // Exclude passwords
-    const safeUsers = users.map(({ password, ...user }) => user);
-    res.json(safeUsers);
+    if (req.user.role !== 'admin' && req.user.role !== 'department') return res.status(403).json({ error: 'Access denied' });
+    const users = await User.find({}, '-password').sort({ createdAt: -1 });
+    res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
@@ -74,21 +52,19 @@ exports.toggleActiveStatus = async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
 
-    const users = readUsers();
-    const userIndex = users.findIndex(u => u.id === req.params.id);
-    if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+    const user = await User.findOne({ id: req.params.id });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Toggle status
-    users[userIndex].isActive = !users[userIndex].isActive;
-    writeUsers(users);
+    user.isActive = !user.isActive;
+    await user.save();
 
-    res.json({ message: `User account is now ${users[userIndex].isActive ? 'Active' : 'Deactivated'}.`, isActive: users[userIndex].isActive });
+    res.json({ message: `User account is now ${user.isActive ? 'Active' : 'Deactivated'}.`, isActive: user.isActive });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update user status' });
   }
 };
 
-// Citizen: Update their own profile
+// User: Update their own profile
 exports.updateProfile = async (req, res) => {
   try {
     if (req.user.id !== req.params.id) {
@@ -97,30 +73,25 @@ exports.updateProfile = async (req, res) => {
 
     const { name, email, phone, address, city, profilePhoto, notifications } = req.body;
     
-    const users = readUsers();
-    const userIndex = users.findIndex(u => u.id === req.params.id);
-    if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (address !== undefined) updateData.address = address;
+    if (city !== undefined) updateData.city = city;
+    if (profilePhoto !== undefined) updateData.profilePhoto = profilePhoto;
+    if (notifications !== undefined) updateData.notifications = notifications;
 
-    // Update allowed fields
-    const u = users[userIndex];
-    if (name) u.name = name;
-    if (email) u.email = email;
-    if (phone) u.phone = phone;
-    if (address !== undefined) u.address = address;
-    if (city !== undefined) u.city = city;
-    if (profilePhoto !== undefined) u.profilePhoto = profilePhoto;
-    if (notifications !== undefined) u.notifications = notifications;
+    const user = await User.findOneAndUpdate({ id: req.params.id }, updateData, { new: true }).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    writeUsers(users);
-
-    const { password: _, ...safeUser } = u;
-    res.json(safeUser);
+    res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Update failed' });
   }
 };
 
-// Citizen: Change password securely
+// User: Change password securely
 exports.changePassword = async (req, res) => {
   try {
     if (req.user.id !== req.params.id) {
@@ -130,15 +101,14 @@ exports.changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) return res.status(400).json({ error: 'Missing password fields' });
 
-    const users = readUsers();
-    const userIndex = users.findIndex(u => u.id === req.params.id);
-    if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+    const user = await User.findOne({ id: req.params.id });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const isMatch = await bcrypt.compare(oldPassword, users[userIndex].password);
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Incorrect old password' });
 
-    users[userIndex].password = await bcrypt.hash(newPassword, 10);
-    writeUsers(users);
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
 
     res.json({ message: 'Password updated successfully' });
   } catch (err) {
