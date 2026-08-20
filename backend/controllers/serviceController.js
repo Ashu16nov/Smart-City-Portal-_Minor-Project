@@ -24,9 +24,16 @@ exports.createService = async (req, res) => {
     return res.status(403).json({ error: 'Only admins can create services' });
   }
   try {
-    const { name, category, description, location, contactNumber, workingHours } = req.body;
+    const { 
+      name, category, description, detailedDescription, location, address, area, landmark, latitude, longitude,
+      contactNumber, emergencyPhone, email, website, workingHours, status,
+      facilities, servicesOffered, requirements, fees, accessibility, onlineServices, complaintType
+    } = req.body;
+    
     const newService = new Service({
-      name, category, description, location, contactNumber, workingHours,
+      name, category, description, detailedDescription, location, address, area, landmark, latitude, longitude,
+      contactNumber, emergencyPhone, email, website, workingHours, status,
+      facilities, servicesOffered, requirements, fees, accessibility, onlineServices, complaintType,
       createdBy: req.user.id
     });
     await newService.save();

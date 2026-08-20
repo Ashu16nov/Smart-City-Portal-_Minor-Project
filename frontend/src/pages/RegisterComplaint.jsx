@@ -81,7 +81,7 @@ const RegisterComplaint = () => {
       <div style={{ padding: '60px 60px 40px 60px', textAlign: 'center', background: '#b2ebf2', borderBottom: '1px solid #80deea', marginBottom: '40px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#006064', margin: '0 0 15px 0' }}>Log an Issue</h1>
         <p style={{ fontSize: '16px', color: '#00838f', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
-          Submit your infrastructure or service requests directly to the Smart City Authority.
+          Submit your infrastructure or service requests directly to the Society Management.
         </p>
       </div>
 
@@ -92,22 +92,23 @@ const RegisterComplaint = () => {
             <h3 style={{ color: '#166534', borderBottom: '2px dashed #bbf7d0', paddingBottom: '10px', marginBottom: '15px', fontSize: '18px', fontWeight: '800' }}>📍 Geographical Metrics</h3>
             <div className="form-grid" style={{ gap: '15px' }}>
               <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label htmlFor="district">Administrative Zone <span style={{ color: 'red' }}>*</span></label>
+                <label htmlFor="district">Block / Tower <span style={{ color: 'red' }}>*</span></label>
                 <select id="district" value={formData.district} onChange={handleInputChange} required>
-                  <option value="" disabled>Select Zone</option>
-                  <option value="North Zone">North Zone</option>
-                  <option value="South Zone">South Zone</option>
-                  <option value="East Zone">East Zone</option>
-                  <option value="West Zone">West Zone</option>
-                  <option value="Central District">Central District</option>
+                  <option value="" disabled>Select Block</option>
+                  <option value="Tower A">Tower A</option>
+                  <option value="Tower B">Tower B</option>
+                  <option value="Tower C">Tower C</option>
+                  <option value="Tower D">Tower D</option>
+                  <option value="Clubhouse / Common Area">Clubhouse / Common Area</option>
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label htmlFor="ward">Sector / Ward <span style={{ color: 'red' }}>*</span></label>
+                <label htmlFor="ward">Floor <span style={{ color: 'red' }}>*</span></label>
                 <select id="ward" value={formData.ward} onChange={handleInputChange} required>
-                  <option value="" disabled>Select Sector</option>
+                  <option value="" disabled>Select Floor</option>
+                  <option value="Ground Floor">Ground Floor</option>
                   {[...Array(15)].map((_, i) => (
-                    <option key={i + 1} value={`Sector ${i + 1}`}>Sector {i + 1}</option>
+                    <option key={i + 1} value={`Floor ${i + 1}`}>Floor {i + 1}</option>
                   ))}
                 </select>
               </div>
@@ -117,7 +118,7 @@ const RegisterComplaint = () => {
               <input 
                 type="text" 
                 id="location" 
-                placeholder="e.g. Near Tech Park, Avenue 4" 
+                placeholder="e.g. Flat 402 or Main Lobby" 
                 value={formData.location} 
                 onChange={handleInputChange} 
                 required 
@@ -132,16 +133,14 @@ const RegisterComplaint = () => {
                 <label htmlFor="category">Service Category <span style={{ color: 'red' }}>*</span></label>
                 <select id="category" value={formData.category} onChange={handleInputChange} required>
                   <option value="" disabled>Select Category</option>
-                  <option value="Road & Potholes">🛣️ Road & Potholes</option>
-                  <option value="Street Lights">💡 Street Lights</option>
-                  <option value="Garbage/Waste">🗑️ Garbage/Waste</option>
-                  <option value="Water Supply">🚰 Water Supply</option>
-                  <option value="Drainage">💧 Drainage</option>
-                  <option value="Electricity">⚡ Electricity</option>
-                  <option value="Traffic">🚦 Traffic</option>
-                  <option value="Public Safety">🛡️ Public Safety</option>
-                  <option value="Parks">🏞️ Parks</option>
-                  <option value="Sewage">🚾 Sewage</option>
+                  <option value="Plumbing/Water Leak">🚰 Plumbing/Water Leak</option>
+                  <option value="Electrical Issue">⚡ Electrical Issue</option>
+                  <option value="Housekeeping/Garbage">🗑️ Housekeeping/Garbage</option>
+                  <option value="Lift/Elevator">🛗 Lift/Elevator</option>
+                  <option value="Security/Visitor Issue">🛡️ Security/Visitor Issue</option>
+                  <option value="Parking Issue">🚗 Parking Issue</option>
+                  <option value="Clubhouse/Amenities">🏊 Clubhouse/Amenities</option>
+                  <option value="Common Area Maintenance">🏢 Common Area Maintenance</option>
                   <option value="Other">❓ Other</option>
                 </select>
               </div>

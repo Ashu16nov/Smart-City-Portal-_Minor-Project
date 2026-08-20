@@ -44,36 +44,40 @@ const User = require('./models/User');
 async function seedUsers() {
   try {
     // 1. Seed Admin
-    const adminExists = await User.findOne({ username: 'admin' });
-    if (!adminExists) {
-      const hashedAdminPassword = await bcrypt.hash('Admin@123', 10);
-      await User.create({
-        id: 'admin-001',
-        name: 'Municipal Admin',
-        username: 'admin',
-        password: hashedAdminPassword,
-        email: 'admin@pmc.gov.in',
-        phone: '0000000000',
-        role: 'admin'
-      });
-      console.log('✅ Default admin seeded (admin / Admin@123)');
-    }
+    const hashedAdminPassword = await bcrypt.hash('Admin@123', 10);
+    await User.findOneAndUpdate(
+      { username: 'admin' },
+      {
+        $setOnInsert: { id: 'admin-001', name: 'Municipal Admin', email: 'admin@pmc.gov.in', phone: '0000000000' },
+        $set: { password: hashedAdminPassword, role: 'admin' }
+      },
+      { upsert: true, new: true }
+    );
+    console.log('✅ Default admin seeded (admin / Admin@123)');
 
     // 2. Seed User Ashu
-    const ashuExists = await User.findOne({ username: 'Ashu' });
-    if (!ashuExists) {
-      const hashedUserPassword = await bcrypt.hash('Test@123', 10);
-      await User.create({
-        id: 'user-001',
-        name: 'Ashu',
-        username: 'Ashu',
-        password: hashedUserPassword,
-        email: 'ashu@example.com',
-        phone: '9876543210',
-        role: 'user'
-      });
-      console.log('✅ Default user seeded (Ashu / Test@123)');
-    }
+    const hashedUserPassword = await bcrypt.hash('Test@123', 10);
+    await User.findOneAndUpdate(
+      { username: 'Ashu' },
+      {
+        $setOnInsert: { id: 'user-001', name: 'Ashu', email: 'ashu@example.com', phone: '9876543210' },
+        $set: { password: hashedUserPassword, role: 'user' }
+      },
+      { upsert: true, new: true }
+    );
+    console.log('✅ Default citizen seeded (Ashu / Test@123)');
+
+    // 3. Seed Staff
+    const hashedStaffPassword = await bcrypt.hash('Staff@123', 10);
+    await User.findOneAndUpdate(
+      { username: 'staff' },
+      {
+        $setOnInsert: { id: 'staff-001', name: 'Municipal Staff', email: 'staff@pmc.gov.in', phone: '1111111111' },
+        $set: { password: hashedStaffPassword, role: 'staff' }
+      },
+      { upsert: true, new: true }
+    );
+    console.log('✅ Default staff seeded (staff / Staff@123)');
   } catch (err) {
     console.error('Seed error:', err.message);
   }
@@ -87,7 +91,8 @@ app.use('/api/feedbacks', require('./routes/feedbackRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
-
+app.use('/api/emergency', require('./routes/emergencyRoutes'));
+app.use('/api/announcements', require('./routes/announcementRoutes'));
 // ─── Start ───────────────────────────────────────────────────────────────────
 const http = require('http');
 const { Server } = require('socket.io');

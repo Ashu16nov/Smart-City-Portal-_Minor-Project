@@ -13,8 +13,8 @@ const Login = () => {
   });
 
   const [formData, setFormData] = useState({
-    loginUser: '',
-    loginPass: '',
+    loginUser: 'Ashu',
+    loginPass: 'Test@123',
     signupUsername: '',
     signupEmail: '',
     signupPass: '',
@@ -167,6 +167,13 @@ const Login = () => {
   const handleRoleSwitch = (e, role) => {
     e.preventDefault();
     setLoginRole(role);
+    if (role === 'admin') {
+      setFormData(prev => ({ ...prev, loginUser: 'admin', loginPass: 'Admin@123' }));
+    } else if (role === 'staff') {
+      setFormData(prev => ({ ...prev, loginUser: 'staff', loginPass: 'Staff@123' }));
+    } else {
+      setFormData(prev => ({ ...prev, loginUser: 'Ashu', loginPass: 'Test@123' }));
+    }
   };
 
   return (
@@ -207,6 +214,18 @@ const Login = () => {
                 onChange={handleInputChange}
               />
               <span className="error-msg">{errors.loginPass}</span>
+            </div>
+
+            <div className="quick-login-hints" style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12px', marginBottom: '15px', color: '#64748b' }}>
+              <div style={{ cursor: 'pointer', padding: '4px', background: '#f8fafc', borderRadius: '4px' }} onClick={() => { setLoginRole('user'); setFormData(prev => ({ ...prev, loginUser: 'Ashu', loginPass: 'Test@123' })); }}>
+                <strong>Citizen:</strong> Ashu / Test@123
+              </div>
+              <div style={{ cursor: 'pointer', padding: '4px', background: '#f8fafc', borderRadius: '4px' }} onClick={() => { setLoginRole('staff'); setFormData(prev => ({ ...prev, loginUser: 'staff', loginPass: 'Staff@123' })); }}>
+                <strong>Staff:</strong> staff / Staff@123
+              </div>
+              <div style={{ cursor: 'pointer', padding: '4px', background: '#f8fafc', borderRadius: '4px' }} onClick={() => { setLoginRole('admin'); setFormData(prev => ({ ...prev, loginUser: 'admin', loginPass: 'Admin@123' })); }}>
+                <strong>Admin:</strong> admin / Admin@123
+              </div>
             </div>
 
             <a href="#" className="forgot-link" onClick={() => routeToPanel('forgot', "Password Recovery", "Securely authenticate your identity to regain access to your dashboard.", false)}>Forgot Password?</a>

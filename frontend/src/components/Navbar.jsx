@@ -38,12 +38,18 @@ const Navbar = () => {
       <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{ background: 'linear-gradient(135deg, #0ea5e9, #6366f1)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: '18px', boxShadow: '0 4px 10px rgba(14,165,233,0.3)' }}>🏙️</div>
         <h2 className="logo" style={{ margin: 0, fontSize: '22px', fontWeight: '800', letterSpacing: '-0.5px' }}>
-          {isAdmin ? 'SmartCity Admin' : 'SmartCity'}
+          {isAdmin ? 'Ambika Green Admin' : 'Ambika Green Phase 1'}
         </h2>
       </Link>
       <ul id="global-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, padding: 0 }}>
         <li>
           <Link to="/" style={{ padding: '8px 16px', borderRadius: '100px', fontWeight: '600', color: location.pathname === '/' ? '#0ea5e9' : '#475569', background: location.pathname === '/' ? '#f0f9ff' : 'transparent', textDecoration: 'none', transition: '0.2s' }}>Home</Link>
+        </li>
+        <li>
+          <Link to="/emergency" style={{ padding: '8px 16px', borderRadius: '100px', fontWeight: '600', color: location.pathname === '/emergency' ? '#0ea5e9' : '#475569', background: location.pathname === '/emergency' ? '#f0f9ff' : 'transparent', textDecoration: 'none', transition: '0.2s' }}>Emergency</Link>
+        </li>
+        <li>
+          <Link to="/announcements" style={{ padding: '8px 16px', borderRadius: '100px', fontWeight: '600', color: location.pathname === '/announcements' ? '#0ea5e9' : '#475569', background: location.pathname === '/announcements' ? '#f0f9ff' : 'transparent', textDecoration: 'none', transition: '0.2s' }}>📢 Notice Board</Link>
         </li>
         <li style={{ position: 'relative' }} onMouseLeave={() => setShowServicesDropdown(false)}>
           <div 
@@ -88,6 +94,7 @@ const Navbar = () => {
                   <>
                     <Link to="/admin" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>⚙️ Complaints Panel</Link>
                     <Link to="/admin/services" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>🏥 Manage Services</Link>
+                    <Link to="/admin/announcements" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>📢 Manage Notices</Link>
                   </>
                 )}
                 <button className="drop-logout" onClick={handleLogout} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px', margin: '4px', justifyContent: 'center' }}>🚪 Logout</button>

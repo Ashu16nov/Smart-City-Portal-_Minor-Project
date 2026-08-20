@@ -14,8 +14,8 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero">
         <div className="overlay">
-          <h1>Smart City Civic Portal</h1>
-          <p>Next-generation urban management. Report issues, track resolutions, and build a better city.</p>
+          <h1>Ambika Green Society Portal</h1>
+          <p>Next-generation society management. Report issues, track resolutions, and build a better community.</p>
           {!isAdmin && <Link to="/register" className="btn">Report an Issue</Link>}
         </div>
       </section>
@@ -24,15 +24,15 @@ const Home = () => {
       <section className="section">
         <h2>About The Platform</h2>
         <p>
-          The Smart City Civic Portal is an integrated system designed to bridge the gap between citizens and municipal authorities. 
+          The Ambika Green Society Portal is an integrated system designed to bridge the gap between residents and society management. 
           Through this unified dashboard, residents can seamlessly report infrastructure issues, track maintenance in real-time, 
-          and contribute to the sustainable development of our urban spaces.
+          and contribute to the sustainable development of our residential spaces.
         </p>
       </section>
 
       {/* Smart Domains Section */}
       <section className="section dark">
-        <h2>Smart City Domains</h2>
+        <h2>Society Domains</h2>
         <div className="card-container">
           <div className="card">
             <div className="icon-placeholder">🏗️</div>
@@ -69,7 +69,7 @@ const Home = () => {
           <Link to="/feedback" className="service-box">
             <span>💡</span>
             <h3>Citizen Feedback</h3>
-            <p>Provide valuable feedback to help optimize municipal operations.</p>
+            <p>Provide valuable feedback to help optimize society operations.</p>
           </Link>
           <div className="service-box">
             <span>🔐</span>

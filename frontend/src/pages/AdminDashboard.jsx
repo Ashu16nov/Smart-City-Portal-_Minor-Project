@@ -24,6 +24,11 @@ const AdminDashboard = () => {
   const [staffForm, setStaffForm] = useState({ name: '', username: '', email: '', password: '', department: 'General' });
   const [staffSearchTerm, setStaffSearchTerm] = useState('');
 
+  // Emergency Management State
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
+  const [emergencyReports, setEmergencyReports] = useState([]);
+  const [newContact, setNewContact] = useState({ title: '', contactNumber: '', category: 'Police', location: '', instructions: '' });
+
   const [serverOnline, setServerOnline] = useState(false);
 
   useEffect(() => {
@@ -65,6 +70,16 @@ const AdminDashboard = () => {
       const userResp = await api.get('/users');
       if (Array.isArray(userResp.data)) {
         setUsers(userResp.data);
+      }
+
+      const contactsResp = await api.get('/emergency/admin/contacts');
+      if (Array.isArray(contactsResp.data)) {
+        setEmergencyContacts(contactsResp.data);
+      }
+
+      const reportsResp = await api.get('/emergency/admin/reports');
+      if (Array.isArray(reportsResp.data)) {
+        setEmergencyReports(reportsResp.data);
       }
 
       fetchStats();
@@ -156,6 +171,39 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateContact = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.post('/emergency/contacts', newContact);
+      setEmergencyContacts([...emergencyContacts, res.data]);
+      toast.success('Emergency contact added successfully!');
+      setNewContact({ title: '', contactNumber: '', category: 'Police', location: '', instructions: '' });
+    } catch(err) {
+      toast.error('Failed to add contact');
+    }
+  };
+
+  const handleDeleteContact = async (id) => {
+    if (!window.confirm("Delete this emergency contact?")) return;
+    try {
+      await api.delete(`/emergency/contacts/${id}`);
+      setEmergencyContacts(emergencyContacts.filter(c => c._id !== id));
+      toast.success('Contact deleted');
+    } catch(err) {
+      toast.error('Failed to delete contact');
+    }
+  };
+
+  const handleUpdateReportStatus = async (id, status) => {
+    try {
+      await api.put(`/emergency/reports/${id}/status`, { status });
+      setEmergencyReports(emergencyReports.map(r => r._id === id ? { ...r, status } : r));
+      toast.success('Report status updated');
+    } catch(err) {
+      toast.error('Failed to update report status');
+    }
+  };
+
   const safeComplaints = Array.isArray(complaints) ? complaints : [];
   const filteredList = safeComplaints.filter(c => {
     const term = searchTerm.toLowerCase();
@@ -211,6 +259,11 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('staff')} 
           style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: activeTab === 'staff' ? '#0f172a' : '#cbd5e1', color: activeTab === 'staff' ? '#fff' : '#475569', cursor: 'pointer', fontWeight: 'bold' }}>
           Staff Management
+        </button>
+        <button 
+          onClick={() => setActiveTab('emergency')} 
+          style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: activeTab === 'emergency' ? '#991b1b' : '#fecaca', color: activeTab === 'emergency' ? '#fff' : '#991b1b', cursor: 'pointer', fontWeight: 'bold' }}>
+          🚨 Emergency Mgmt
         </button>
       </div>
 
@@ -419,6 +472,141 @@ const AdminDashboard = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'emergency' && (
+        <div style={{ padding: '0 40px', marginBottom: '100px' }}>
+          <div style={{ display: 'flex', gap: '30px' }}>
+            
+            {/* Left: Add Contact Form */}
+            <div style={{ flex: '1', background: 'white', padding: '30px', borderRadius: '20px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', height: 'fit-content' }}>
+              <h3 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '20px', fontWeight: '800' }}>Add Emergency Contact</h3>
+              <form onSubmit={handleCreateContact}>
+                <div style={{ display: 'grid', gap: '15px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>Title</label>
+                    <input type="text" required placeholder="e.g. Traffic Police" value={newContact.title} onChange={e => setNewContact({...newContact, title: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>Contact Number</label>
+                    <input type="text" required placeholder="e.g. 103" value={newContact.contactNumber} onChange={e => setNewContact({...newContact, contactNumber: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>Category</label>
+                    <select value={newContact.category} onChange={e => setNewContact({...newContact, category: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                      <option value="Police">Police</option>
+                      <option value="Fire Brigade">Fire Brigade</option>
+                      <option value="Ambulance">Ambulance</option>
+                      <option value="Disaster Management">Disaster Management</option>
+                      <option value="Women/Child Helpline">Women/Child Helpline</option>
+                      <option value="Hospital Emergency">Hospital Emergency</option>
+                      <option value="Electricity Emergency">Electricity Emergency</option>
+                      <option value="Water Emergency">Water Emergency</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>Location</label>
+                    <input type="text" placeholder="e.g. City Wide" value={newContact.location} onChange={e => setNewContact({...newContact, location: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>Instructions</label>
+                    <textarea placeholder="e.g. Call for immediate assistance." value={newContact.instructions} onChange={e => setNewContact({...newContact, instructions: e.target.value})} rows="2" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
+                  </div>
+                  <button type="submit" style={{ background: '#ef4444', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>Add Contact</button>
+                </div>
+              </form>
+            </div>
+
+            {/* Right: Emergency Reports & Contacts List */}
+            <div style={{ flex: '2', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+              
+              {/* Emergency Reports */}
+              <div style={{ background: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(8px)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                <div style={{ padding: '20px 30px', background: 'rgba(239, 68, 68, 0.2)', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>🚨 Urgent Emergency Reports</h3>
+                  <div style={{ color: '#fca5a5', fontWeight: 'bold', fontSize: '14px' }}>Active Reports: {emergencyReports.filter(r => r.status !== 'Resolved').length}</div>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead style={{ background: 'rgba(0,0,0,0.2)', color: 'rgba(255,255,255,0.6)', fontSize: '13px', textTransform: 'uppercase' }}>
+                    <tr>
+                      <th style={{ padding: '15px 20px' }}>Type / Location</th>
+                      <th style={{ padding: '15px 20px' }}>Description</th>
+                      <th style={{ padding: '15px 20px' }}>Status</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {emergencyReports.map(r => (
+                      <tr key={r._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                        <td style={{ padding: '15px 20px' }}>
+                          <strong style={{ color: '#fca5a5' }}>{r.emergencyType}</strong>
+                          <div style={{ color: 'white', fontSize: '13px' }}>{r.location}</div>
+                        </td>
+                        <td style={{ padding: '15px 20px', color: 'rgba(255,255,255,0.8)', fontSize: '13px', maxWidth: '200px' }}>{r.description}</td>
+                        <td style={{ padding: '15px 20px' }}>
+                          <select 
+                            value={r.status} 
+                            onChange={(e) => handleUpdateReportStatus(r._id, e.target.value)}
+                            style={{ 
+                              padding: '5px 10px', 
+                              borderRadius: '6px', 
+                              border: 'none',
+                              background: r.status === 'Resolved' ? '#dcfce7' : '#fef08a',
+                              color: r.status === 'Resolved' ? '#166534' : '#854d0e',
+                              fontWeight: 'bold',
+                              fontSize: '12px'
+                            }}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '15px 20px', textAlign: 'right' }}>
+                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>{new Date(r.createdAt).toLocaleString()}</span>
+                        </td>
+                      </tr>
+                    ))}
+                    {emergencyReports.length === 0 && (
+                      <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>No emergency reports.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Contacts List */}
+              <div style={{ background: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(8px)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                <div style={{ padding: '20px 30px', background: 'rgba(0,0,0,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>Manage Emergency Contacts</h3>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead style={{ background: 'rgba(0,0,0,0.2)', color: 'rgba(255,255,255,0.6)', fontSize: '13px', textTransform: 'uppercase' }}>
+                    <tr>
+                      <th style={{ padding: '15px 20px' }}>Service</th>
+                      <th style={{ padding: '15px 20px' }}>Number</th>
+                      <th style={{ padding: '15px 20px', textAlign: 'right' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {emergencyContacts.map(c => (
+                      <tr key={c._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                        <td style={{ padding: '15px 20px' }}>
+                          <strong style={{ color: 'white' }}>{c.title}</strong>
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>{c.category}</div>
+                        </td>
+                        <td style={{ padding: '15px 20px', color: '#6ee7b7', fontWeight: 'bold' }}>{c.contactNumber}</td>
+                        <td style={{ padding: '15px 20px', textAlign: 'right' }}>
+                          <button onClick={() => handleDeleteContact(c._id)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

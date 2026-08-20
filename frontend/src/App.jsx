@@ -12,6 +12,9 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import PublicServices from './pages/PublicServices';
 import AdminServices from './pages/AdminServices';
+import Emergency from './pages/Emergency';
+import Announcements from './pages/Announcements';
+import AdminAnnouncements from './pages/AdminAnnouncements';
 function App() {
   const [user, setUser] = React.useState(null);
 
@@ -50,6 +53,9 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/services" element={<PublicServices />} />
             <Route path="/admin/services" element={<AdminServices />} />
+            <Route path="/emergency" element={<Emergency />} />
+            <Route path="/announcements" element={<Announcements />} />
+            <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           </Routes>
         </main>
         <Footer />
