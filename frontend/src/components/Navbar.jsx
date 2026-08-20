@@ -80,6 +80,11 @@ const Navbar = () => {
             <li>
               <Link to="/feedback" style={{ padding: '8px 16px', borderRadius: '100px', fontWeight: '600', color: location.pathname === '/feedback' ? '#0ea5e9' : '#475569', background: location.pathname === '/feedback' ? '#f0f9ff' : 'transparent', textDecoration: 'none', transition: '0.2s' }}>Feedback</Link>
             </li>
+            <li style={{ marginLeft: '10px' }}>
+              <Link to="/notifications" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', background: location.pathname === '/notifications' ? '#e0f2fe' : '#f1f5f9', color: '#0ea5e9', textDecoration: 'none', fontSize: '20px', transition: '0.2s', position: 'relative' }}>
+                🔔
+              </Link>
+            </li>
             <li className="profile-container" style={{ marginLeft: '15px' }}>
               <div className="circle-avatar" onClick={() => setShowDropdown(!showDropdown)} style={{ border: '2px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                 {user.name.charAt(0).toUpperCase()}
@@ -95,6 +100,7 @@ const Navbar = () => {
                     <Link to="/admin" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>⚙️ Complaints Panel</Link>
                     <Link to="/admin/services" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>🏥 Manage Services</Link>
                     <Link to="/admin/announcements" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>📢 Manage Notices</Link>
+                    <Link to="/admin/notifications" className="drop-link" onClick={() => setShowDropdown(false)} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>🚀 Broadcast Alert</Link>
                   </>
                 )}
                 <button className="drop-logout" onClick={handleLogout} style={{ borderRadius: '8px', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px', margin: '4px', justifyContent: 'center' }}>🚪 Logout</button>

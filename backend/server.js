@@ -93,6 +93,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/emergency', require('./routes/emergencyRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 // ─── Start ───────────────────────────────────────────────────────────────────
 const http = require('http');
 const { Server } = require('socket.io');

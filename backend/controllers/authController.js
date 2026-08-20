@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const NotificationService = require('../services/notificationService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'MunicipalSuperSecretKey123!@#';
 const usersFilePath = path.join(__dirname, '..', 'users.json');
@@ -57,6 +58,17 @@ exports.signup = async (req, res) => {
 
     const token = jwt.sign({ userId: newUser._id, id: newUser.id, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
     const { password: _, ...safeUser } = newUser;
+    
+    // Send Notification
+    const io = req.app.get('socketio');
+    await NotificationService.send(io, {
+      userId: newUser.id,
+      type: 'Account',
+      title: 'Registration Successful',
+      message: `Welcome to Ambika Green Phase 1 Portal, ${newUser.name}!`,
+      emailOptions: { to: newUser.email }
+    });
+
     res.status(201).json({ message: 'Account created', token, user: safeUser });
   } catch (err) {
     console.error(err);
@@ -132,6 +144,16 @@ exports.verifyOTP = async (req, res) => {
     if (Date.now() > record.expiresAt) return res.status(400).json({ error: 'OTP has expired.' });
     if (record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP.' });
 
+    // Send Notification
+    const io = req.app.get('socketio');
+    await NotificationService.send(io, {
+      userId: email, // Since we only have email at this point
+      type: 'Account',
+      title: 'OTP Verification Successful',
+      message: `Your OTP was verified successfully.`,
+      emailOptions: { to: email }
+    });
+
     res.json({ message: 'OTP Verified successfully.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to verify OTP.' });
@@ -154,6 +176,17 @@ exports.resetPassword = async (req, res) => {
     writeUsers(users);
 
     delete otpStore[email]; // Clear OTP
+
+    // Send Notification
+    const io = req.app.get('socketio');
+    await NotificationService.send(io, {
+      userId: users[userIndex].id,
+      type: 'Account',
+      title: 'Password Changed',
+      message: `Your password has been successfully reset.`,
+      emailOptions: { to: email }
+    });
+
     res.json({ message: 'Password has been reset successfully.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to reset password.' });

@@ -1,4 +1,5 @@
 const Announcement = require('../models/Announcement');
+const NotificationService = require('../services/notificationService');
 
 // 1. Get all published announcements (for citizens)
 exports.getPublicAnnouncements = async (req, res) => {
@@ -33,6 +34,17 @@ exports.createAnnouncement = async (req, res) => {
       publishDate: publishDate || Date.now()
     });
     const savedAnnouncement = await newAnnouncement.save();
+
+    // Send Global Notification
+    const io = req.app.get('socketio');
+    await NotificationService.send(io, {
+      userId: 'global',
+      type: 'Announcement',
+      title: isImportant ? `🚨 Important: ${title}` : `📢 New Announcement: ${title}`,
+      message: description,
+      emailOptions: { to: 'all-users@example.com' }
+    });
+
     res.status(201).json(savedAnnouncement);
   } catch (error) {
     res.status(400).json({ error: 'Failed to create announcement', details: error.message });

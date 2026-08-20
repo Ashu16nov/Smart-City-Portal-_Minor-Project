@@ -15,6 +15,12 @@ import AdminServices from './pages/AdminServices';
 import Emergency from './pages/Emergency';
 import Announcements from './pages/Announcements';
 import AdminAnnouncements from './pages/AdminAnnouncements';
+import Notifications from './pages/Notifications';
+import AdminNotifications from './pages/AdminNotifications';
+import { io } from 'socket.io-client';
+import { toast } from 'react-toastify';
+
+const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5005');
 function App() {
   const [user, setUser] = React.useState(null);
 
@@ -37,6 +43,28 @@ function App() {
     }
   }, []);
 
+  React.useEffect(() => {
+    // Listen for global and user-specific notifications
+    const handleNotification = (notif) => {
+      toast.info(`🔔 ${notif.title}: ${notif.message}`, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
+    };
+
+    socket.on('receiveNotification', handleNotification);
+    if (user && user.id) {
+      socket.on(`receiveNotification_${user.id}`, handleNotification);
+    }
+
+    return () => {
+      socket.off('receiveNotification', handleNotification);
+      if (user && user.id) {
+        socket.off(`receiveNotification_${user.id}`, handleNotification);
+      }
+    };
+  }, [user]);
+
   return (
     <Router>
       <div className="app-container">
@@ -56,6 +84,8 @@ function App() {
             <Route path="/emergency" element={<Emergency />} />
             <Route path="/announcements" element={<Announcements />} />
             <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+            <Route path="/notifications" element={user ? <Notifications /> : <Login />} />
+            <Route path="/admin/notifications" element={(user && user.role === 'admin') ? <AdminNotifications /> : <Login />} />
           </Routes>
         </main>
         <Footer />

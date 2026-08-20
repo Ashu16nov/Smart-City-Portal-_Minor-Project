@@ -1,4 +1,5 @@
 const Complaint = require('../models/Complaint');
+const NotificationService = require('../services/notificationService');
 
 // Helper to generate unique Complaint ID
 const generateComplaintId = () => {
@@ -63,6 +64,15 @@ exports.createComplaint = async (req, res) => {
     const io = req.app.get('socketio');
     io.emit('new_complaint', complaint);
 
+    // Send Notification
+    await NotificationService.send(io, {
+      userId: req.user.userId,
+      type: 'Complaint',
+      title: 'Complaint Submitted',
+      message: `Your complaint (${complaintId}) regarding ${req.body.category} has been submitted successfully.`,
+      emailOptions: { to: 'user@example.com' } // Mocked
+    });
+
     res.status(201).json(complaint);
   } catch (err) {
     console.error("COMPLAINT CREATE ERROR:", err);
@@ -101,6 +111,17 @@ exports.updateComplaint = async (req, res) => {
     // Real-time update
     const io = req.app.get('socketio');
     io.emit('status_update', updated);
+
+    // Send Notification if status changed
+    if (req.body.status) {
+      await NotificationService.send(io, {
+        userId: updated.userId,
+        type: 'Complaint',
+        title: `Complaint ${req.body.status}`,
+        message: `Your complaint (${updated.complaintId}) status has been updated to ${req.body.status}.`,
+        emailOptions: { to: 'user@example.com' }
+      });
+    }
 
     res.json({ message: 'Updated successfully', complaint: updated });
   } catch (err) {
