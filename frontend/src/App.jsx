@@ -26,6 +26,7 @@ import AqiDashboard from './pages/AqiDashboard';
 import WasteManagement from './pages/WasteManagement';
 import CivicPolls from './pages/CivicPolls';
 import SmartParkingPage from './pages/SmartParkingPage';
+import LocalHub from './pages/LocalHub';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -104,6 +105,7 @@ function App() {
             <Route path="/waste-management" element={<WasteManagement />} />
             <Route path="/civic-budgeting" element={<CivicPolls />} />
             <Route path="/smart-parking" element={<SmartParkingPage />} />
+            <Route path="/local-hub" element={<LocalHub />} />
           </Routes>
         </main>
         <Footer />

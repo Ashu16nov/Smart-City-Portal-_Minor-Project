@@ -3,11 +3,13 @@ const router = express.Router();
 const emergencyController = require('../controllers/emergencyController');
 const authenticateToken = require('../middleware/authMiddleware');
 
-// Public/Citizen Routes for Contacts
+// Public/Citizen Routes for Contacts & Live Alerts
 router.get('/contacts', emergencyController.getContacts);
+router.get('/alerts', emergencyController.getLiveAlerts);
 
-// Protected Routes (Citizen) for Reports
+// Protected/Public Routes (Citizen) for Reports & SOS
 router.post('/reports', authenticateToken, emergencyController.reportEmergency);
+router.post('/sos', emergencyController.triggerSOS);
 
 // Admin Routes for Contacts
 router.get('/admin/contacts', authenticateToken, emergencyController.getAllContactsAdmin);

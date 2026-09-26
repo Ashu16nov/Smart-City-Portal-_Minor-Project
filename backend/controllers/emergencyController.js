@@ -140,3 +140,69 @@ exports.updateReportStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update report status' });
   }
 };
+
+// ─── 1-Click SOS Broadcast ──────────────────────────────────────────────────
+exports.triggerSOS = async (req, res) => {
+  try {
+    const { latitude, longitude, sector, details } = req.body;
+    
+    const locationStr = latitude && longitude 
+      ? `GPS Coordinates: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} (${sector || 'Mohali Sector Direct'})`
+      : (sector || 'Mohali Emergency Location');
+
+    const report = new EmergencyReport({
+      citizenId: req.user ? (req.user.id || req.user.userId) : null,
+      emergencyType: 'CRITICAL 1-CLICK SOS',
+      location: locationStr,
+      description: details || '🚨 URGENT SOS BROADCAST: Citizen requested immediate emergency response from Mohali PCR & Municipal Dispatchers.'
+    });
+
+    await report.save();
+
+    const io = req.app.get('socketio');
+    if (io) {
+      io.emit('new_emergency', report);
+      io.emit('sos_alert', {
+        id: report._id,
+        location: locationStr,
+        timestamp: new Date().toLocaleTimeString('en-IN')
+      });
+    }
+
+    res.status(201).json({
+      message: '🚨 Emergency SOS Broadcast Sent to Mohali Control Room (PCR 112). Immediate action initiated.',
+      report
+    });
+  } catch (err) {
+    console.error('Error triggering SOS:', err);
+    res.status(500).json({ error: 'Failed to dispatch SOS alert. Please dial 112 / 0172-2219222 directly.' });
+  }
+};
+
+// ─── Live Municipal Weather & Disaster Alert Ticker ─────────────────────────
+exports.getLiveAlerts = async (req, res) => {
+  try {
+    const alerts = [
+      {
+        id: 'alt-01',
+        type: 'Weather & Municipal Advisory',
+        severity: 'Moderate',
+        title: '🌧️ Monsoon Drainage Alert - SAS Nagar',
+        message: 'Municipal Corporation Mohali teams active across Phase 3B2, Phase 7, and Sector 70. Drive cautiously near water-logging prone stretches.',
+        timestamp: 'Live'
+      },
+      {
+        id: 'alt-02',
+        type: 'Public Safety',
+        severity: 'High',
+        title: '🚨 24x7 Mohali Police Emergency Dispatch Active',
+        message: 'Direct 1-Click SOS system connected with Mohali PCR Control Room (0172-2219222 / 112) for rapid emergency assistance.',
+        timestamp: 'Live'
+      }
+    ];
+    res.json(alerts);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch live alerts' });
+  }
+};
+

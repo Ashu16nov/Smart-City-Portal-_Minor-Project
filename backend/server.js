@@ -100,6 +100,7 @@ app.use('/api/aqi', require('./routes/aqiRoutes'));
 app.use('/api/waste', require('./routes/wasteRoutes'));
 app.use('/api/polls', require('./routes/civicPollRoutes'));
 app.use('/api/parking', require('./routes/parkingRoutes'));
+app.use('/api/local-hub', require('./routes/localBusinessRoutes'));
 // ─── Start ───────────────────────────────────────────────────────────────────
 const http = require('http');
 const { Server } = require('socket.io');
