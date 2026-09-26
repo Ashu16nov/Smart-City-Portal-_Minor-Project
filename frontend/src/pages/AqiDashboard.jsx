@@ -13,28 +13,33 @@ const AqiDashboard = () => {
     fetchAqiData();
 
     // Listen for live AI telemetry broadcasts via Socket.IO
-    socket.on('aqi_update', (updatedList) => {
-      setAqiList(updatedList);
-      if (selectedWard) {
-        const found = updatedList.find(w => w.ward === selectedWard.ward);
-        if (found) setSelectedWard(found);
+    const handleAqiUpdate = (updatedList) => {
+      if (Array.isArray(updatedList) && updatedList.length > 0) {
+        setAqiList(updatedList);
+        setSelectedWard(prev => {
+          if (!prev) return updatedList[0];
+          const found = updatedList.find(w => w.ward === prev.ward);
+          return found || updatedList[0];
+        });
+        toast.info('🍃 Live AI Atmospheric Telemetry Updated!');
       }
-      toast.info('🍃 Live AI Atmospheric Telemetry Updated!');
-    });
+    };
+
+    socket.on('aqi_update', handleAqiUpdate);
 
     return () => {
-      socket.off('aqi_update');
+      socket.off('aqi_update', handleAqiUpdate);
     };
-  }, [selectedWard]);
+  }, []); // Run ONCE on mount
 
   const fetchAqiData = async () => {
     try {
       setLoading(true);
       const res = await api.get('/aqi');
-      if (res.data.success) {
+      if (res.data.success && Array.isArray(res.data.data)) {
         setAqiList(res.data.data);
         if (res.data.data.length > 0) {
-          setSelectedWard(res.data.data[0]);
+          setSelectedWard(prev => prev || res.data.data[0]);
         }
       }
     } catch (err) {
@@ -48,13 +53,14 @@ const AqiDashboard = () => {
     try {
       setIsSyncing(true);
       const res = await api.post('/aqi/sync');
-      if (res.data.success) {
+      if (res.data.success && Array.isArray(res.data.data)) {
         setAqiList(res.data.data);
-        if (selectedWard) {
-          const found = res.data.data.find(w => w.ward === selectedWard.ward);
-          if (found) setSelectedWard(found);
-        } else if (res.data.data.length > 0) {
-          setSelectedWard(res.data.data[0]);
+        if (res.data.data.length > 0) {
+          setSelectedWard(prev => {
+            if (!prev) return res.data.data[0];
+            const found = res.data.data.find(w => w.ward === prev.ward);
+            return found || res.data.data[0];
+          });
         }
         toast.success('🤖 Live AI Atmospheric Telemetry Synced with Open-Meteo Satellites!');
       }
@@ -79,14 +85,16 @@ const AqiDashboard = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
-        <h2>🍃 Syncing City Open-Meteo AI Telemetry...</h2>
+      <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>
+        <div style={{ fontSize: '48px', marginBottom: '15px' }}>🍃</div>
+        <h2 style={{ fontSize: '24px', color: '#0f172a' }}>Syncing City Open-Meteo AI Telemetry...</h2>
+        <p style={{ marginTop: '8px' }}>Fetching live atmospheric readings across city wards.</p>
       </div>
     );
   }
 
   return (
-    <div className="aqi-dashboard-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
+    <div className="aqi-dashboard-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px', fontFamily: "'Inter', sans-serif" }}>
       {/* Header Banner */}
       <div style={{
         background: 'linear-gradient(135deg, #0284c7, #0d9488)',
@@ -141,140 +149,149 @@ const AqiDashboard = () => {
         </button>
       </div>
 
-      {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '30px' }}>
-        {/* Left Column: Selected Ward Details */}
-        <div>
-          {selectedWard && (
-            <div style={{ background: 'white', borderRadius: '24px', padding: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: '700' }}>
-                      Ward: {selectedWard.ward}
-                    </span>
-                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: '800' }}>
-                      🟢 Live Open-Meteo Satellite Sync
+      {aqiList.length === 0 ? (
+        <div style={{ background: 'white', borderRadius: '24px', padding: '50px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+          <h3>No AQI telemetry available right now.</h3>
+          <button onClick={handleLiveAiSync} style={{ marginTop: '15px', background: '#0284c7', color: 'white', padding: '10px 20px', borderRadius: '100px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>
+            Fetch Live AI Telemetry
+          </button>
+        </div>
+      ) : (
+        /* Main Grid */
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '30px' }}>
+          {/* Left Column: Selected Ward Details */}
+          <div>
+            {selectedWard && (
+              <div style={{ background: 'white', borderRadius: '24px', padding: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+                  <div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: '700' }}>
+                        Ward: {selectedWard.ward}
+                      </span>
+                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: '800' }}>
+                        🟢 Live Open-Meteo Satellite Sync
+                      </span>
+                    </div>
+
+                    <h2 style={{ margin: '10px 0 4px 0', fontSize: '24px', color: '#0f172a' }}>{selectedWard.locationName}</h2>
+                    <span style={{ color: '#64748b', fontSize: '13px' }}>
+                      Last Satellite Reading: {new Date(selectedWard.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                   </div>
-
-                  <h2 style={{ margin: '10px 0 4px 0', fontSize: '24px', color: '#0f172a' }}>{selectedWard.locationName}</h2>
-                  <span style={{ color: '#64748b', fontSize: '13px' }}>
-                    Last Satellite Reading: {new Date(selectedWard.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </span>
+                  
+                  {/* AQI Badge */}
+                  <div style={{
+                    background: getStatusColor(selectedWard.status).bg,
+                    color: getStatusColor(selectedWard.status).text,
+                    border: `2px solid ${getStatusColor(selectedWard.status).border}`,
+                    borderRadius: '20px',
+                    padding: '15px 25px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '36px', fontWeight: '900', lineHeight: 1 }}>{selectedWard.aqi}</div>
+                    <div style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', marginTop: '4px' }}>US AQI INDEX</div>
+                  </div>
                 </div>
-                
-                {/* AQI Badge */}
+
+                {/* Status Banner */}
                 <div style={{
                   background: getStatusColor(selectedWard.status).bg,
                   color: getStatusColor(selectedWard.status).text,
-                  border: `2px solid ${getStatusColor(selectedWard.status).border}`,
-                  borderRadius: '20px',
-                  padding: '15px 25px',
-                  textAlign: 'center'
+                  padding: '14px 20px',
+                  borderRadius: '16px',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  marginBottom: '25px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
                 }}>
-                  <div style={{ fontSize: '36px', fontWeight: '900', lineHeight: 1 }}>{selectedWard.aqi}</div>
-                  <div style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', marginTop: '4px' }}>US AQI INDEX</div>
+                  <span>ℹ️ Atmospheric Status: <strong>{selectedWard.status}</strong></span>
                 </div>
-              </div>
 
-              {/* Status Banner */}
-              <div style={{
-                background: getStatusColor(selectedWard.status).bg,
-                color: getStatusColor(selectedWard.status).text,
-                padding: '14px 20px',
-                borderRadius: '16px',
-                fontWeight: '700',
-                fontSize: '15px',
-                marginBottom: '25px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <span>ℹ️ Atmospheric Status: <strong>{selectedWard.status}</strong></span>
-              </div>
+                {/* AI Health Advisory */}
+                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #0284c7', marginBottom: '30px' }}>
+                  <h4 style={{ margin: '0 0 6px 0', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>🩺 AI Health & Atmospheric Advisory</span>
+                  </h4>
+                  <p style={{ margin: 0, color: '#334155', fontSize: '14px', lineHeight: '1.6' }}>{selectedWard.healthAdvisory}</p>
+                </div>
 
-              {/* AI Health Advisory */}
-              <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #0284c7', marginBottom: '30px' }}>
-                <h4 style={{ margin: '0 0 6px 0', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🩺 AI Health & Atmospheric Advisory</span>
-                </h4>
-                <p style={{ margin: 0, color: '#334155', fontSize: '14px', lineHeight: '1.6' }}>{selectedWard.healthAdvisory}</p>
+                {/* Pollutants & Telemetry Grid */}
+                <h3 style={{ fontSize: '18px', color: '#0f172a', marginBottom: '15px' }}>Live Satellite Pollutant Concentrations</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat( auto-fit, minmax(130px, 1fr) )', gap: '15px' }}>
+                  <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>PM 2.5</div>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.pm25} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
+                  </div>
+                  <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>PM 10</div>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.pm10} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
+                  </div>
+                  <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>NO₂</div>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.no2} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
+                  </div>
+                  <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>O₃</div>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.o3} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
+                  </div>
+                  <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>CO</div>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.co} <span style={{ fontSize: '12px', color: '#64748b' }}>mg/m³</span></div>
+                  </div>
+                </div>
               </div>
+            )}
+          </div>
 
-              {/* Pollutants & Telemetry Grid */}
-              <h3 style={{ fontSize: '18px', color: '#0f172a', marginBottom: '15px' }}>Live Satellite Pollutant Concentrations</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat( auto-fit, minmax(130px, 1fr) )', gap: '15px' }}>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>PM 2.5</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.pm25} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
-                </div>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>PM 10</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.pm10} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
-                </div>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>NO₂</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.no2} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
-                </div>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>O₃</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.o3} <span style={{ fontSize: '12px', color: '#64748b' }}>µg/m³</span></div>
-                </div>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>CO</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.co} <span style={{ fontSize: '12px', color: '#64748b' }}>mg/m³</span></div>
-                </div>
-              </div>
+          {/* Right Column: Ward Selector List */}
+          <div>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#0f172a' }}>City Wards Live Leaderboard</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {aqiList.map((item) => {
+                const colors = getStatusColor(item.status);
+                const isSelected = selectedWard && selectedWard.ward === item.ward;
+                return (
+                  <div
+                    key={item._id || item.ward}
+                    onClick={() => setSelectedWard(item)}
+                    style={{
+                      background: isSelected ? '#f0f9ff' : 'white',
+                      border: isSelected ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                      borderRadius: '16px',
+                      padding: '16px 20px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '15px', color: '#0f172a' }}>{item.ward}</h4>
+                      <span style={{ fontSize: '12px', color: '#64748b' }}>{item.locationName}</span>
+                    </div>
+
+                    <div style={{
+                      background: colors.bg,
+                      color: colors.text,
+                      padding: '6px 14px',
+                      borderRadius: '12px',
+                      fontWeight: '800',
+                      fontSize: '15px'
+                    }}>
+                      {item.aqi}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
-
-        {/* Right Column: Ward Selector List */}
-        <div>
-          <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#0f172a' }}>City Wards Live Leaderboard</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {aqiList.map((item) => {
-              const colors = getStatusColor(item.status);
-              const isSelected = selectedWard && selectedWard.ward === item.ward;
-              return (
-                <div
-                  key={item._id || item.ward}
-                  onClick={() => setSelectedWard(item)}
-                  style={{
-                    background: isSelected ? '#f0f9ff' : 'white',
-                    border: isSelected ? '2px solid #0284c7' : '1px solid #e2e8f0',
-                    borderRadius: '16px',
-                    padding: '16px 20px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-                  }}
-                >
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '15px', color: '#0f172a' }}>{item.ward}</h4>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>{item.locationName}</span>
-                  </div>
-
-                  <div style={{
-                    background: colors.bg,
-                    color: colors.text,
-                    padding: '6px 14px',
-                    borderRadius: '12px',
-                    fontWeight: '800',
-                    fontSize: '15px'
-                  }}>
-                    {item.aqi}
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
