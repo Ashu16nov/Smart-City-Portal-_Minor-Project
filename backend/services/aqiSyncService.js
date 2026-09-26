@@ -1,29 +1,29 @@
 const AqiData = require('../models/AqiData');
 
-// Ward Geo-Coordinates Map for Live Open-Meteo Air Quality Telemetry
+// Official Mohali (SAS Nagar, Punjab) Ward Geo-Coordinates Map for Live Open-Meteo AI Telemetry
 const WARD_COORDINATES = [
-  { ward: 'Shivaji Nagar', locationName: 'Shivaji Nagar Transit & Commercial Hub', lat: 18.5314, lon: 73.8446 },
-  { ward: 'Kothrud', locationName: 'Kothrud Hill Front & Paud Road Sector', lat: 18.5074, lon: 73.8077 },
-  { ward: 'Hadapsar', locationName: 'Hadapsar Industrial & IT Corridor', lat: 18.5089, lon: 73.9260 },
-  { ward: 'Viman Nagar', locationName: 'Viman Nagar International Airport Zone', lat: 18.5679, lon: 73.9143 },
-  { ward: 'Aundh', locationName: 'Aundh Botanical & IT Tech Park Zone', lat: 18.5580, lon: 73.8070 },
-  { ward: 'Baner', locationName: 'Baner Bio-Diversity & Smart Transit Hub', lat: 18.5590, lon: 73.7868 }
+  { ward: 'Phase 7 Mohali', locationName: 'Phase 7 Main Commercial & Transit Hub, Mohali', lat: 30.7046, lon: 76.7179 },
+  { ward: 'Phase 3B2 Mohali', locationName: 'Phase 3B2 Sector Market & Food Hub, Mohali', lat: 30.7093, lon: 76.7262 },
+  { ward: 'Sector 70 Mohali', locationName: 'Sector 70 Administrative & Residential Zone, Mohali', lat: 30.6974, lon: 76.7214 },
+  { ward: 'Phase 10 Mohali', locationName: 'Phase 10 PCA Stadium & Sports Sector, Mohali', lat: 30.6865, lon: 76.7329 },
+  { ward: 'Industrial Area Phase 8', locationName: 'Industrial Area Phase 8 IT & Tech Park, Mohali', lat: 30.6775, lon: 76.7380 },
+  { ward: 'Aerocity IT City', locationName: 'Aerocity International Airport Corridor, Mohali', lat: 30.6482, lon: 76.7909 }
 ];
 
 // AI-based Health Advisory Generator based on pollutant thresholds
 const generateAiHealthAdvisory = (aqi, pm25, pm10) => {
   if (aqi <= 50) {
-    return '🌱 Excellent air quality! Atmosphere is clean and fresh. Perfect for outdoor sports and jogging.';
+    return '🌱 Excellent air quality across Mohali! Atmosphere is clean and fresh. Ideal for outdoor exercise and park walks.';
   } else if (aqi <= 100) {
-    return '🍃 Air quality is acceptable. Unusually sensitive individuals should consider limiting prolonged outdoor exertion.';
+    return '🍃 Air quality in Mohali is moderate. Unusually sensitive individuals should consider limiting prolonged outdoor exertion.';
   } else if (aqi <= 150) {
-    return '⚠️ Unhealthy for sensitive groups. Children, elderly, and people with respiratory disease should reduce outdoor exertion.';
+    return '⚠️ Unhealthy for sensitive groups. Children, elderly, and those with respiratory issues should reduce outdoor activity.';
   } else if (aqi <= 200) {
-    return '🚨 Unhealthy air quality detected! Everyone may begin to experience health effects. Wear N95 masks outdoors.';
+    return '🚨 Unhealthy air quality detected! Wear N95 masks outdoor across Mohali sectors.';
   } else if (aqi <= 300) {
-    return '🚨 Very Unhealthy! Health alert: everyone may experience more serious health effects. Avoid outdoor activities.';
+    return '🚨 Very Unhealthy! Serious atmospheric smog alert for SAS Nagar. Avoid outdoor sports.';
   } else {
-    return '☣️ Hazardous Air Quality Alert! Emergency conditions. Avoid all outdoor activity and keep windows closed.';
+    return '☣️ Hazardous Air Quality Alert! Emergency conditions in Mohali. Keep windows closed and stay indoors.';
   }
 };
 
@@ -36,10 +36,10 @@ const getAqiStatus = (aqi) => {
   return 'Hazardous';
 };
 
-// Fetch real-time live air quality data from Open-Meteo Free Public API
+// Fetch real-time live air quality data from Open-Meteo Free Public API for Mohali
 const syncLiveAqiData = async (io = null) => {
   try {
-    console.log('🤖 Syncing Live Open-Meteo AI Air Quality Telemetry...');
+    console.log('🤖 Syncing Live Open-Meteo AI Air Quality Telemetry for Mohali, Punjab...');
     const updatedRecords = [];
 
     for (const item of WARD_COORDINATES) {
@@ -95,7 +95,7 @@ const syncLiveAqiData = async (io = null) => {
       io.emit('aqi_update', updatedRecords);
     }
 
-    console.log(`✅ Live AI AQI Telemetry Synced for ${updatedRecords.length} wards`);
+    console.log(`✅ Live AI AQI Telemetry Synced for ${updatedRecords.length} Mohali sectors`);
     return updatedRecords;
   } catch (error) {
     console.error('❌ Error in syncLiveAqiData:', error.message);
@@ -103,16 +103,13 @@ const syncLiveAqiData = async (io = null) => {
   }
 };
 
-// Automatic background interval runner (every 10 minutes)
 let isCronInitialized = false;
 const initAqiCron = (io) => {
   if (isCronInitialized) return;
   isCronInitialized = true;
 
-  // Run initial sync on server start
-  setTimeout(() => syncLiveAqiData(io), 3000);
+  setTimeout(() => syncLiveAqiData(io), 2000);
 
-  // Repeat every 10 minutes
   setInterval(() => {
     syncLiveAqiData(io);
   }, 10 * 60 * 1000);

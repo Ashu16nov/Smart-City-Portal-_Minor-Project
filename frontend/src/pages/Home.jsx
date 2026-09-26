@@ -14,11 +14,11 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #0369a1 100%)' }}>
         <div className="overlay">
-          <h1 style={{ fontSize: '64px', fontWeight: '900', letterSpacing: '-2px', marginBottom: '20px', background: 'linear-gradient(to right, #ffffff, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Ambika Green <br/> Smart City Portal
+          <h1 style={{ fontSize: '56px', fontWeight: '900', letterSpacing: '-2px', marginBottom: '20px', background: 'linear-gradient(to right, #ffffff, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Mohali Smart City <br/> (SAS Nagar, Punjab)
           </h1>
-          <p style={{ fontSize: '22px', color: '#e0f2fe', maxWidth: '600px', margin: '0 auto 40px', lineHeight: '1.5' }}>
-            Next-generation civic management. Report issues, track resolutions, and participate in building a smarter, safer community.
+          <p style={{ fontSize: '20px', color: '#e0f2fe', maxWidth: '650px', margin: '0 auto 40px', lineHeight: '1.5' }}>
+            Official digital civic management platform for Sahibzada Ajit Singh Nagar (Mohali). Report issues, track resolutions, and participate in building a smarter, greener city.
           </p>
           {!isAdmin && <Link to="/register" className="btn" style={{ fontSize: '18px', padding: '16px 40px', borderRadius: '100px', background: '#0ea5e9', boxShadow: '0 10px 25px rgba(14,165,233,0.4)' }}>Report an Issue 🚀</Link>}
         </div>

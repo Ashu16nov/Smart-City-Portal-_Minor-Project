@@ -7,55 +7,55 @@ const seedDefaultParking = async () => {
     const defaultHubs = [
       {
         spotId: 'PRK-01',
-        locationName: 'FC Road Smart Multi-Level Complex',
-        address: 'Fergusson College Road, Shivaji Nagar',
-        ward: 'Shivaji Nagar',
-        totalSlots: 120,
-        availableSlots: 42,
-        hourlyRate: 30,
+        locationName: 'Phase 3B2 Main Market Smart Parking Complex',
+        address: 'Main Market Road, Phase 3B2, Mohali',
+        ward: 'Phase 3B2 Mohali',
+        totalSlots: 140,
+        availableSlots: 48,
+        hourlyRate: 20,
         isEVChargingAvailable: true,
-        latitude: 18.5204,
-        longitude: 73.8567
+        latitude: 30.7093,
+        longitude: 76.7262
       },
       {
         spotId: 'PRK-02',
-        locationName: 'Kothrud City Mall & Metro Station Parking',
-        address: 'Karve Road, Kothrud',
-        ward: 'Kothrud',
-        totalSlots: 90,
-        availableSlots: 18,
-        hourlyRate: 20,
+        locationName: 'Sector 70 Administrative Complex Parking',
+        address: 'Opposite District Courts & MC Office, Sector 70, Mohali',
+        ward: 'Sector 70 Mohali',
+        totalSlots: 100,
+        availableSlots: 32,
+        hourlyRate: 15,
         isEVChargingAvailable: true,
-        latitude: 18.5074,
-        longitude: 73.8077
+        latitude: 30.6974,
+        longitude: 76.7214
       },
       {
         spotId: 'PRK-03',
-        locationName: 'Viman Nagar IT Hub Parking Lot A',
-        address: 'Phoenix Mall Road, Viman Nagar',
-        ward: 'Viman Nagar',
-        totalSlots: 150,
-        availableSlots: 65,
-        hourlyRate: 40,
+        locationName: 'Industrial Area Phase 8 IT Park Parking Lot',
+        address: 'Quark City & IT Park Corridor, Phase 8, Mohali',
+        ward: 'Industrial Area Phase 8',
+        totalSlots: 180,
+        availableSlots: 75,
+        hourlyRate: 25,
         isEVChargingAvailable: true,
-        latitude: 18.5679,
-        longitude: 73.9143
+        latitude: 30.6775,
+        longitude: 76.7380
       },
       {
         spotId: 'PRK-04',
-        locationName: 'Swargate Bus Terminal & Transit Spot',
-        address: 'Swargate Flyover Junction',
-        ward: 'Swargate',
-        totalSlots: 80,
-        availableSlots: 8,
-        hourlyRate: 25,
+        locationName: 'PCA Stadium & Sports Complex Transit Parking',
+        address: 'Cricket Stadium Road, Phase 9/10, Mohali',
+        ward: 'Phase 10 Mohali',
+        totalSlots: 120,
+        availableSlots: 18,
+        hourlyRate: 20,
         isEVChargingAvailable: false,
-        latitude: 18.5018,
-        longitude: 73.8636
+        latitude: 30.6865,
+        longitude: 76.7329
       }
     ];
     await SmartParking.insertMany(defaultHubs);
-    console.log('✅ Default Smart Parking Hubs Seeded successfully');
+    console.log('✅ Default Mohali Smart Parking Hubs Seeded successfully');
   }
 };
 

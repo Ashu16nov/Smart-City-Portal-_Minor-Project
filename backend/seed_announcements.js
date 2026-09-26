@@ -16,7 +16,7 @@ const announcements = [
   },
   {
     title: 'Upcoming RWA Annual General Meeting',
-    description: 'The Annual General Meeting for Ambika Green Phase 1 will be held at the Clubhouse on Sunday at 11:00 AM. All flat owners are requested to attend.',
+    description: 'The Annual General Meeting for Phase 7 Mohali Sector will be held at the Community Center on Sunday at 11:00 AM. All residents are requested to attend.',
     category: 'RWA Notice',
     isImportant: true,
     status: 'Published'

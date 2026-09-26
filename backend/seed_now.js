@@ -1,3 +1,7 @@
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+dns.setDefaultResultOrder('ipv4first');
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
@@ -14,7 +18,7 @@ async function seedNow() {
     await User.findOneAndUpdate(
       { username: 'admin' },
       {
-        $setOnInsert: { id: 'admin-001', name: 'Municipal Admin', email: 'admin@pmc.gov.in', phone: '0000000000' },
+        $setOnInsert: { id: 'admin-001', name: 'Municipal Admin', email: 'admin@mcmohali.gov.in', phone: '0000000000' },
         $set: { password: hashedAdmin, role: 'admin' }
       },
       { upsert: true, new: true }
@@ -26,7 +30,7 @@ async function seedNow() {
     await User.findOneAndUpdate(
       { username: 'staff' },
       {
-        $setOnInsert: { id: 'staff-001', name: 'Municipal Staff', email: 'staff@pmc.gov.in', phone: '1111111111' },
+        $setOnInsert: { id: 'staff-001', name: 'Municipal Staff', email: 'staff@mcmohali.gov.in', phone: '1111111111' },
         $set: { password: hashedStaff, role: 'staff' }
       },
       { upsert: true, new: true }

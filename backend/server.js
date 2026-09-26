@@ -48,7 +48,7 @@ async function seedUsers() {
     await User.findOneAndUpdate(
       { username: 'admin' },
       {
-        $setOnInsert: { id: 'admin-001', name: 'Municipal Admin', email: 'admin@pmc.gov.in', phone: '0000000000' },
+        $setOnInsert: { id: 'admin-001', name: 'MC Mohali Admin', email: 'admin@mcmohali.gov.in', phone: '0172-2270068' },
         $set: { password: hashedAdminPassword, role: 'admin' }
       },
       { upsert: true, new: true }
@@ -60,7 +60,7 @@ async function seedUsers() {
     await User.findOneAndUpdate(
       { username: 'Ashu' },
       {
-        $setOnInsert: { id: 'user-001', name: 'Ashu', email: 'ashu@example.com', phone: '9876543210' },
+        $setOnInsert: { id: 'user-001', name: 'Ashu', email: 'ashu@mohali.gov.in', phone: '9876543210' },
         $set: { password: hashedUserPassword, role: 'user' }
       },
       { upsert: true, new: true }
@@ -72,8 +72,8 @@ async function seedUsers() {
     await User.findOneAndUpdate(
       { username: 'staff' },
       {
-        $setOnInsert: { id: 'staff-001', name: 'Municipal Staff', email: 'staff@pmc.gov.in', phone: '1111111111' },
-        $set: { password: hashedStaffPassword, role: 'staff' }
+        $setOnInsert: { id: 'staff-001', name: 'Mohali Field Staff', email: 'staff@mcmohali.gov.in', phone: '0172-2270011' },
+        $set: { password: hashedStaffPassword, role: 'staff', departmentName: 'Sanitation & Roads' }
       },
       { upsert: true, new: true }
     );
