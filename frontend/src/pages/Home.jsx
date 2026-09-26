@@ -57,6 +57,37 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Next-Gen Smart City Modules Section */}
+      <section className="section" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '60px 20px' }}>
+        <h2 style={{ fontSize: '36px', color: 'var(--text-primary)', marginBottom: '10px' }}>⚡ Next-Gen Smart City Modules</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>Advanced IoT telemetry, environmental monitoring, and citizen governance</p>
+        <div className="services" style={{ display: 'grid', gridTemplateColumns: 'repeat( auto-fit, minmax(240px, 1fr) )', gap: '25px', maxWidth: '1200px', margin: '0 auto' }}>
+          <Link to="/aqi" className="service-box" style={{ background: 'white', borderRadius: '20px', padding: '25px', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.3s' }}>
+            <span style={{ fontSize: '40px' }}>🍃</span>
+            <h3 style={{ margin: '15px 0 8px 0', fontSize: '20px', color: '#0f172a' }}>AQI Telemetry Monitor</h3>
+            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>Real-time ward air quality index, PM2.5 monitoring, and health advisories.</p>
+          </Link>
+
+          <Link to="/waste-management" className="service-box" style={{ background: 'white', borderRadius: '20px', padding: '25px', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.3s' }}>
+            <span style={{ fontSize: '40px' }}>♻️</span>
+            <h3 style={{ margin: '15px 0 8px 0', fontSize: '20px', color: '#0f172a' }}>Waste & E-Waste Pickup</h3>
+            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>Schedule door-to-door recycling pickups & earn Citizen Eco-Points.</p>
+          </Link>
+
+          <Link to="/civic-budgeting" className="service-box" style={{ background: 'white', borderRadius: '20px', padding: '25px', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.3s' }}>
+            <span style={{ fontSize: '40px' }}>🏛️</span>
+            <h3 style={{ margin: '15px 0 8px 0', fontSize: '20px', color: '#0f172a' }}>Civic Budgeting Polls</h3>
+            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>Vote on municipal budget allocations & community infrastructure proposals.</p>
+          </Link>
+
+          <Link to="/smart-parking" className="service-box" style={{ background: 'white', borderRadius: '20px', padding: '25px', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.3s' }}>
+            <span style={{ fontSize: '40px' }}>🅿️</span>
+            <h3 style={{ margin: '15px 0 8px 0', fontSize: '20px', color: '#0f172a' }}>Smart Parking & EV</h3>
+            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>Check live slot availability, locate EV chargers & reserve parking spots.</p>
+          </Link>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="section">
         <h2 style={{ fontSize: '36px', color: 'var(--text-primary)', marginBottom: '10px' }}>Digital Services</h2>

@@ -20,6 +20,12 @@ import Announcements from './pages/Announcements';
 import AdminAnnouncements from './pages/AdminAnnouncements';
 import Notifications from './pages/Notifications';
 import AdminNotifications from './pages/AdminNotifications';
+import CabBooking from './pages/CabBooking';
+import MyBookings from './pages/MyBookings';
+import AqiDashboard from './pages/AqiDashboard';
+import WasteManagement from './pages/WasteManagement';
+import CivicPolls from './pages/CivicPolls';
+import SmartParkingPage from './pages/SmartParkingPage';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -92,6 +98,12 @@ function App() {
             <Route path="/admin/announcements" element={<AdminAnnouncements />} />
             <Route path="/notifications" element={user ? <Notifications /> : <Login />} />
             <Route path="/admin/notifications" element={(user && user.role === 'admin') ? <AdminNotifications /> : <Login />} />
+            <Route path="/cab-booking" element={user ? <CabBooking /> : <Login />} />
+            <Route path="/my-bookings" element={user ? <MyBookings /> : <Login />} />
+            <Route path="/aqi" element={<AqiDashboard />} />
+            <Route path="/waste-management" element={<WasteManagement />} />
+            <Route path="/civic-budgeting" element={<CivicPolls />} />
+            <Route path="/smart-parking" element={<SmartParkingPage />} />
           </Routes>
         </main>
         <Footer />

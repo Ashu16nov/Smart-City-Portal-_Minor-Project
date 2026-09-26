@@ -4,6 +4,8 @@
   "description": "Online Complaints Management System - Backend",
   "main": "server.js",
   "scripts": {
+    "prestart": "npx -y kill-port 5005",
+    "predev": "npx -y kill-port 5005",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },

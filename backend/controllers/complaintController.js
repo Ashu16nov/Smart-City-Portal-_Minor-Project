@@ -11,21 +11,49 @@ const generateComplaintId = () => {
 exports.getComplaints = async (req, res) => {
   try {
     let query = {};
+    const User = require('../models/User');
+
     if (req.user.role === 'user') {
-      query = { userId: req.user.userId };
+      query = { userId: req.user.userId || req.user.id };
     } else if (req.user.role === 'department') {
-      query = { assignedDepartmentId: req.user.id };
+      const deptUser = await User.findById(req.user.userId || req.user.id);
+      if (deptUser && deptUser.departmentName) {
+        query = {
+          $or: [
+            { assignedDepartmentId: deptUser.id },
+            { assignedDepartmentId: deptUser._id.toString() },
+            { category: new RegExp(deptUser.departmentName.replace(/Department|Dept/gi, '').trim(), 'i') },
+            { department: new RegExp(deptUser.departmentName, 'i') }
+          ]
+        };
+      } else {
+        query = { 
+          $or: [
+            { assignedDepartmentId: req.user.id },
+            { assignedDepartmentId: req.user.userId }
+          ] 
+        };
+      }
     } else if (req.user.role === 'staff') {
-      query = { assignedStaffId: req.user.id };
+      const staffUser = await User.findById(req.user.userId || req.user.id);
+      const staffIdVal = staffUser ? (staffUser.id || staffUser._id.toString()) : (req.user.userId || req.user.id);
+      query = {
+        $or: [
+          { assignedStaffId: staffIdVal },
+          { assignedStaffId: req.user.userId },
+          { assignedStaffId: req.user.id }
+        ]
+      };
     }
     // Admin gets all complaints (query = {})
 
     const complaints = await Complaint.find(query)
       .select('-image')
       .sort({ _id: -1 })
-      .limit(100);
+      .limit(200);
     res.json(complaints);
   } catch (err) {
+    console.error('getComplaints error:', err);
     res.status(500).json({ error: 'Failed to fetch complaints' });
   }
 };

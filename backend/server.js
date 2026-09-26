@@ -95,6 +95,11 @@ app.use('/api/emergency', require('./routes/emergencyRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/search', require('./routes/searchRoutes'));
+app.use('/api/cabs', require('./routes/cabBookingRoutes'));
+app.use('/api/aqi', require('./routes/aqiRoutes'));
+app.use('/api/waste', require('./routes/wasteRoutes'));
+app.use('/api/polls', require('./routes/civicPollRoutes'));
+app.use('/api/parking', require('./routes/parkingRoutes'));
 // ─── Start ───────────────────────────────────────────────────────────────────
 const http = require('http');
 const { Server } = require('socket.io');
@@ -115,6 +120,16 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('🔌 User disconnected');
   });
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Error: Port ${PORT} is already in use by another Node.js instance.`);
+    console.error(`💡 Solution: Close the active process on port ${PORT} or run 'npx kill-port ${PORT}'.\n`);
+    process.exit(1);
+  } else {
+    console.error('❌ Server error:', err);
+  }
 });
 
 server.listen(PORT, () => {

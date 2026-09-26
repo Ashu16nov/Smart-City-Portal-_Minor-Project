@@ -143,12 +143,22 @@ const PublicServices = () => {
         ) : (
           <div>
             {selectedCategory !== 'All Categories' && searchTerm === '' && (
-              <button 
-                onClick={() => setSelectedCategory('All Categories')} 
-                style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: '800', fontSize: '15px', cursor: 'pointer', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', padding: 0 }}
-              >
-                ← Back to Categories
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <button 
+                  onClick={() => setSelectedCategory('All Categories')} 
+                  style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: '800', fontSize: '15px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: 0 }}
+                >
+                  ← Back to Categories
+                </button>
+                {selectedCategory === 'Public Transport' && (
+                  <Link 
+                    to="/cab-booking" 
+                    style={{ background: '#f59e0b', color: 'white', textDecoration: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: '800', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)' }}
+                  >
+                    🚕 Book a Cab
+                  </Link>
+                )}
+              </div>
             )}
 
             {filteredServices.length === 0 ? (
