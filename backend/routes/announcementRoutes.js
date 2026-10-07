@@ -6,11 +6,16 @@ const {
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
-  toggleImportance
+  toggleImportance,
+  rsvpEvent
 } = require('../controllers/announcementController');
+const authenticateToken = require('../middleware/authMiddleware');
 
 // Public route (Citizens)
 router.get('/public', getPublicAnnouncements);
+
+// RSVP Route (Requires auth)
+router.post('/:id/rsvp', authenticateToken, rsvpEvent);
 
 // Admin routes (Assume front-end logic restricts access for now, or you can add middleware)
 router.get('/', getAllAnnouncements);

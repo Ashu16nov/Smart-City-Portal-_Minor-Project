@@ -15,6 +15,11 @@ const announcementSchema = new mongoose.Schema({
     default: 'Published' 
   },
   publishDate: { type: Date, default: Date.now },
+  eventDate: { type: Date },
+  eventLocation: { type: String },
+  maxAttendees: { type: Number },
+  attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  isVolunteering: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

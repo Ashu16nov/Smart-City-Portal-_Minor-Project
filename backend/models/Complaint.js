@@ -4,6 +4,11 @@ const complaintSchema = new mongoose.Schema({
   complaintId: { type: String, required: true, unique: true }, // Example: CMP123456
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   userName: { type: String, default: 'Anonymous Citizen' },
+  requestType: { 
+    type: String, 
+    enum: ['Grievance/Complaint', 'Certificate Application', 'Tax Payment Issue', 'Road & Traffic', 'Other'],
+    default: 'Grievance/Complaint' 
+  },
   title: { type: String, required: true },
   description: { type: String, required: true },
   category: { type: String, required: true },
@@ -36,6 +41,7 @@ const complaintSchema = new mongoose.Schema({
   latitude: { type: Number },
   longitude: { type: Number },
   image: { type: String }, // base64 string
+  uploadedDocuments: [{ type: String }], // for E-Governance (base64 strings or URLs)
   adminNote: { type: String, default: '' },
   resolutionProof: { type: String }, // base64 string for proof
   feedback: {

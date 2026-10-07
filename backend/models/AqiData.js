@@ -11,6 +11,8 @@ const aqiDataSchema = new mongoose.Schema({
   co: { type: Number, default: 0.8 },
   temp: { type: Number, default: 28 },
   humidity: { type: Number, default: 55 },
+  trafficCongestionIndex: { type: Number, default: 2, min: 1, max: 10 },
+  trafficStatus: { type: String, enum: ['Clear', 'Slow', 'Heavy', 'Gridlock'], default: 'Clear' },
   status: { 
     type: String, 
     enum: ['Good', 'Moderate', 'Unhealthy for Sensitive Groups', 'Unhealthy', 'Very Unhealthy', 'Hazardous'], 

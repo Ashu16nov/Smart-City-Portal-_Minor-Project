@@ -384,7 +384,7 @@ const AdminDashboard = () => {
                     <td style={{ padding: '14px', fontWeight: '800', color: '#0ea5e9' }}>{c.complaintId}</td>
                     <td style={{ padding: '14px' }}>
                       <strong style={{ color: '#0f172a' }}>{c.title}</strong>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>🏷️ {c.category} ({c.ward || 'Main Zone'})</div>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>🏷️ {c.requestType} • {c.category} ({c.ward || 'Main Zone'})</div>
                     </td>
                     <td style={{ padding: '14px', color: '#334155' }}>{c.userName}</td>
                     <td style={{ padding: '14px' }}>
@@ -604,7 +604,7 @@ const AdminDashboard = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
-                <span style={{ fontSize: '12px', color: '#0ea5e9', fontWeight: '800' }}>{selectedComplaint.category}</span>
+                <span style={{ fontSize: '12px', color: '#0ea5e9', fontWeight: '800' }}>{selectedComplaint.requestType || 'Grievance'} - {selectedComplaint.category}</span>
                 <h3 style={{ margin: '4px 0', color: '#0f172a' }}>{selectedComplaint.title}</h3>
                 <p style={{ margin: 0, color: '#475569', fontSize: '14px' }}>{selectedComplaint.description}</p>
               </div>
@@ -613,6 +613,13 @@ const AdminDashboard = () => {
                 <div>👤 Citizen: <strong>{selectedComplaint.userName}</strong></div>
                 <div>📍 Location: <strong>{selectedComplaint.location || selectedComplaint.ward || 'Main Ward'}</strong></div>
               </div>
+
+              {selectedComplaint.image && (
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Attached Evidence / Document</label>
+                  <img src={selectedComplaint.image} alt="Attachment" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '12px', border: '1px solid #cbd5e1' }} />
+                </div>
+              )}
 
               <div>
                 <label style={{ fontSize: '13px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Official Admin Remark / Directive</label>

@@ -10,6 +10,13 @@ const cabBookingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  transportMode: { 
+    type: String, 
+    enum: ['Cab', 'Bus', 'Metro'], 
+    default: 'Cab' 
+  },
+  routeId: { type: String }, // E.g., 'Bus Route 24', 'Metro Red Line'
+  isPass: { type: Boolean, default: false },
   pickup: {
     type: String,
     required: true
@@ -24,7 +31,7 @@ const cabBookingSchema = new mongoose.Schema({
   },
   cabType: {
     type: String,
-    enum: ['Mini', 'Sedan', 'SUV'],
+    enum: ['Mini', 'Sedan', 'SUV', 'Metro Ticket', 'Bus Pass'],
     required: true
   },
   baseFare: {

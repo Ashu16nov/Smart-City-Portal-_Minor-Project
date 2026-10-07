@@ -41,6 +41,21 @@ const serviceSchema = new mongoose.Schema({
   }],
   complaintType: { type: String }, // e.g. "Utilities", "Public Safety"
   
+  hospitalStats: {
+    availableBeds: { type: Number, default: 0 },
+    icuBeds: { type: Number, default: 0 },
+    bloodBank: {
+      A_pos: { type: Number, default: 0 },
+      O_pos: { type: Number, default: 0 },
+      B_pos: { type: Number, default: 0 },
+      AB_pos: { type: Number, default: 0 },
+      A_neg: { type: Number, default: 0 },
+      O_neg: { type: Number, default: 0 },
+      B_neg: { type: Number, default: 0 },
+      AB_neg: { type: Number, default: 0 }
+    }
+  },
+
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

@@ -113,13 +113,13 @@ const AqiDashboard = () => {
           <span style={{ fontSize: '42px' }}>🤖</span>
           <div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '4px' }}>
-              <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '800' }}>Smart City AI Air Quality Monitor</h1>
+              <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '800' }}>Smart City Environment & Traffic AI</h1>
               <span style={{ background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: '800' }}>
                 LIVE AI API ENABLED
               </span>
             </div>
             <p style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>
-              Real-time atmospheric telemetry powered by Open-Meteo free AI satellite API across city wards.
+              Real-time atmospheric telemetry and traffic flow powered by AI across city wards.
             </p>
           </div>
         </div>
@@ -242,6 +242,29 @@ const AqiDashboard = () => {
                     <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{selectedWard.co} <span style={{ fontSize: '12px', color: '#64748b' }}>mg/m³</span></div>
                   </div>
                 </div>
+
+                {/* Traffic Status Grid */}
+                {selectedWard.trafficStatus && (
+                  <div style={{ marginTop: '30px', background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '20px' }}>
+                    <h3 style={{ fontSize: '18px', color: '#0f172a', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>🚦</span> Live Traffic Congestion
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Congestion Index (1-10)</div>
+                        <div style={{ fontSize: '32px', fontWeight: '900', color: selectedWard.trafficCongestionIndex >= 7 ? '#dc2626' : selectedWard.trafficCongestionIndex >= 4 ? '#d97706' : '#16a34a' }}>
+                          {selectedWard.trafficCongestionIndex || 2}
+                        </div>
+                      </div>
+                      <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Current Flow</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', marginTop: '5px', color: selectedWard.trafficStatus === 'Gridlock' || selectedWard.trafficStatus === 'Heavy' ? '#dc2626' : selectedWard.trafficStatus === 'Slow' ? '#d97706' : '#16a34a' }}>
+                          {selectedWard.trafficStatus}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

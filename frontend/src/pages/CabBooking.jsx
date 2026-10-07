@@ -5,9 +5,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import api from '../utils/api';
 
 const CAB_OPTIONS = [
-  { type: 'Mini', capacity: 3, baseFare: 40, perKmRate: 12, icon: '🚗' },
-  { type: 'Sedan', capacity: 4, baseFare: 50, perKmRate: 15, icon: '🚘' },
-  { type: 'SUV', capacity: 6, baseFare: 70, perKmRate: 18, icon: '🚙' }
+  { type: 'Mini', capacity: 3, baseFare: 40, perKmRate: 12, icon: '🚗', transportMode: 'Cab' },
+  { type: 'Sedan', capacity: 4, baseFare: 50, perKmRate: 15, icon: '🚘', transportMode: 'Cab' },
+  { type: 'SUV', capacity: 6, baseFare: 70, perKmRate: 18, icon: '🚙', transportMode: 'Cab' },
+  { type: 'Metro Ticket', capacity: 200, baseFare: 20, perKmRate: 2, icon: '🚇', transportMode: 'Metro' },
+  { type: 'Bus Pass', capacity: 1, baseFare: 500, perKmRate: 0, icon: '🚌', transportMode: 'Bus', isPass: true }
 ];
 
 const CabBooking = () => {
@@ -115,8 +117,10 @@ const CabBooking = () => {
       const res = await api.post('/cabs/book', {
         pickup,
         destination,
-        distance,
-        cabType: selectedCab.type
+        distance: selectedCab.isPass ? 0 : distance,
+        cabType: selectedCab.type,
+        transportMode: selectedCab.transportMode,
+        isPass: selectedCab.isPass || false
       });
       
       setBookingSuccess(res.data.booking);
@@ -205,10 +209,10 @@ const CabBooking = () => {
                     <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: '0 0 5px 0' }}>{cab.type}</h3>
                     <p style={{ color: '#64748b', fontSize: '12px', fontWeight: '600', margin: '0 0 15px 0' }}>{cab.capacity} Passengers</p>
                     <div style={{ color: '#0ea5e9', fontSize: '12px', fontWeight: '700', marginBottom: '15px' }}>
-                      Base: ₹{cab.baseFare} | ₹{cab.perKmRate}/km
+                      {cab.isPass ? `Flat Pass Fare` : `Base: ₹${cab.baseFare} | ₹${cab.perKmRate}/km`}
                     </div>
                     <div style={{ fontSize: '22px', fontWeight: '900', color: '#16a34a' }}>
-                      ₹{estFare}
+                      ₹{cab.isPass ? cab.baseFare : estFare}
                     </div>
                     {isSelected && (
                       <button 
@@ -251,7 +255,7 @@ const CabBooking = () => {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', paddingTop: '12px', marginTop: '5px' }}>
                 <span style={{ color: '#0f172a', fontSize: '16px', fontWeight: '800' }}>Estimated Fare</span>
-                <span style={{ color: '#16a34a', fontSize: '18px', fontWeight: '900' }}>₹{calculateFare(selectedCab.baseFare, selectedCab.perKmRate)}</span>
+                <span style={{ color: '#16a34a', fontSize: '18px', fontWeight: '900' }}>₹{selectedCab.isPass ? selectedCab.baseFare : calculateFare(selectedCab.baseFare, selectedCab.perKmRate)}</span>
               </div>
             </div>
 
@@ -302,18 +306,20 @@ const CabBooking = () => {
               </div>
             </div>
 
-            <div style={{ textAlign: 'left', background: '#fef3c7', padding: '20px', borderRadius: '16px', marginBottom: '30px' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#b45309', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Driver Assigned</h4>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ color: '#0f172a', fontWeight: '800', fontSize: '16px' }}>{bookingSuccess.driver.name}</div>
-                  <div style={{ color: '#b45309', fontWeight: '600', fontSize: '13px' }}>{bookingSuccess.driver.vehicle}</div>
-                </div>
-                <div style={{ background: '#f59e0b', color: 'white', padding: '6px 12px', borderRadius: '8px', fontWeight: '800', letterSpacing: '1px' }}>
-                  {bookingSuccess.driver.vehicleNumber}
+            {bookingSuccess.driver && (
+              <div style={{ textAlign: 'left', background: '#fef3c7', padding: '20px', borderRadius: '16px', marginBottom: '30px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#b45309', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Driver Assigned</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ color: '#0f172a', fontWeight: '800', fontSize: '16px' }}>{bookingSuccess.driver.name}</div>
+                    <div style={{ color: '#b45309', fontWeight: '600', fontSize: '13px' }}>{bookingSuccess.driver.vehicle}</div>
+                  </div>
+                  <div style={{ background: '#f59e0b', color: 'white', padding: '6px 12px', borderRadius: '8px', fontWeight: '800', letterSpacing: '1px' }}>
+                    {bookingSuccess.driver.vehicleNumber}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <button onClick={() => navigate('/my-bookings')} style={{ background: '#0ea5e9', color: 'white', border: 'none', padding: '16px 30px', borderRadius: '12px', fontSize: '16px', fontWeight: '800', cursor: 'pointer', width: '100%', boxShadow: '0 10px 20px rgba(14,165,233,0.3)' }}>
               View My Bookings

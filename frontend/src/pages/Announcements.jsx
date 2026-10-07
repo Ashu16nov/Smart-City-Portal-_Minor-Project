@@ -10,8 +10,13 @@ const Announcements = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setCurrentUser(user);
+    }
     fetchAnnouncements();
   }, []);
 
@@ -23,6 +28,20 @@ const Announcements = () => {
       toast.error('Failed to load announcements.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRSVP = async (id) => {
+    if (!currentUser) {
+      toast.error('Please login to RSVP for events.');
+      return;
+    }
+    try {
+      const res = await api.post(`/announcements/${id}/rsvp`);
+      setAnnouncements(announcements.map(ann => ann._id === id ? res.data : ann));
+      toast.success('RSVP status updated!');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to RSVP.');
     }
   };
 
@@ -66,6 +85,35 @@ const Announcements = () => {
       <p style={{ fontSize: '15px', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>
         {ann.description}
       </p>
+
+      {ann.category === 'Events' && (
+        <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            {ann.eventDate && <div style={{ fontSize: '14px', color: '#475569', marginBottom: '4px' }}><strong>Date:</strong> {new Date(ann.eventDate).toLocaleDateString()}</div>}
+            {ann.eventLocation && <div style={{ fontSize: '14px', color: '#475569' }}><strong>Location:</strong> {ann.eventLocation}</div>}
+            <div style={{ fontSize: '13px', color: '#0ea5e9', marginTop: '6px', fontWeight: '600' }}>
+              {ann.attendees?.length || 0} {ann.attendees?.length === 1 ? 'person' : 'people'} attending
+              {ann.maxAttendees ? ` (Max: ${ann.maxAttendees})` : ''}
+            </div>
+          </div>
+          <button 
+            onClick={() => handleRSVP(ann._id)}
+            style={{
+              background: currentUser && ann.attendees?.includes(currentUser.id) ? '#ef4444' : '#10b981',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: '0.2s',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}
+          >
+            {currentUser && ann.attendees?.includes(currentUser.id) ? 'Cancel RSVP' : (ann.isVolunteering ? 'Volunteer Now' : 'RSVP')}
+          </button>
+        </div>
+      )}
     </div>
   );
 

@@ -62,6 +62,18 @@ const syncLiveAqiData = async (io = null) => {
         const o3 = current.ozone ? Math.round(current.ozone) : 28;
         const co = current.carbon_monoxide ? Math.round((current.carbon_monoxide / 1000) * 10) / 10 : 0.8;
 
+        // Generate Traffic Data (AI/Mock based on time of day and random jitter)
+        const hour = new Date().getHours();
+        const baseCongestion = (hour >= 8 && hour <= 10) || (hour >= 17 && hour <= 20) ? 6 : 2; // Rush hours
+        const randomJitter = Math.floor(Math.random() * 4);
+        let trafficCongestionIndex = baseCongestion + randomJitter;
+        if (trafficCongestionIndex > 10) trafficCongestionIndex = 10;
+        
+        let trafficStatus = 'Clear';
+        if (trafficCongestionIndex >= 8) trafficStatus = 'Gridlock';
+        else if (trafficCongestionIndex >= 6) trafficStatus = 'Heavy';
+        else if (trafficCongestionIndex >= 4) trafficStatus = 'Slow';
+
         const status = getAqiStatus(rawAqi);
         const healthAdvisory = generateAiHealthAdvisory(rawAqi, pm25, pm10);
 
@@ -79,6 +91,8 @@ const syncLiveAqiData = async (io = null) => {
               co,
               status,
               healthAdvisory,
+              trafficCongestionIndex,
+              trafficStatus,
               lastUpdated: new Date()
             }
           },

@@ -12,6 +12,7 @@ const RegisterComplaint = () => {
     title: '',
     description: '',
     category: '',
+    requestType: 'Grievance/Complaint',
     latitude: null,
     longitude: null
   });
@@ -76,6 +77,7 @@ const RegisterComplaint = () => {
         location: formData.location,
         latitude: formData.latitude,
         longitude: formData.longitude,
+        requestType: formData.requestType,
         image: image
       };
 
@@ -89,7 +91,7 @@ const RegisterComplaint = () => {
       });
 
       // Clear form
-      setFormData({ district: '', ward: '', location: '', title: '', description: '', category: '', latitude: null, longitude: null });
+      setFormData({ district: '', ward: '', location: '', title: '', description: '', category: '', requestType: 'Grievance/Complaint', latitude: null, longitude: null });
       setImage('');
     } catch (err) {
       toast.error('Error: ' + (err.response?.data?.error || 'Failed to submit request'));
@@ -104,9 +106,9 @@ const RegisterComplaint = () => {
       
       {/* HEADER SECTION */}
       <div style={{ padding: '60px 60px 40px 60px', textAlign: 'center', background: '#b2ebf2', borderBottom: '1px solid #80deea', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#006064', margin: '0 0 15px 0' }}>Log an Issue</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#006064', margin: '0 0 15px 0' }}>Log an Issue / Citizen Request</h1>
         <p style={{ fontSize: '16px', color: '#00838f', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
-          Submit your infrastructure or service requests directly to the Society Management.
+          Submit your infrastructure requests, E-Governance applications, or report live traffic conditions directly to the Smart City Management.
         </p>
       </div>
 
@@ -165,8 +167,16 @@ const RegisterComplaint = () => {
           <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', margin: '0 0 15px', padding: '20px 25px' }}>
             <h3 style={{ color: '#b45309', borderBottom: '2px dashed #fde68a', paddingBottom: '10px', marginBottom: '15px', fontSize: '18px', fontWeight: '800' }}>⚠️ Incident Details</h3>
             <div className="form-grid" style={{ gap: '15px' }}>
+              <div className="form-group" style={{ marginBottom: '15px', gridColumn: '1 / -1' }}>
+                <label style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 'bold', color: '#334155' }}>Type of Request:</span>
+                  <label><input type="radio" name="requestType" id="requestType" value="Grievance/Complaint" checked={formData.requestType === 'Grievance/Complaint'} onChange={handleInputChange} /> 😠 Grievance</label>
+                  <label><input type="radio" name="requestType" id="requestType" value="Certificate Application" checked={formData.requestType === 'Certificate Application'} onChange={handleInputChange} /> 📄 E-Gov Application</label>
+                  <label><input type="radio" name="requestType" id="requestType" value="Road & Traffic" checked={formData.requestType === 'Road & Traffic'} onChange={handleInputChange} /> 🚦 Traffic/Road</label>
+                </label>
+              </div>
               <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label htmlFor="category">Service Category <span style={{ color: 'red' }}>*</span></label>
+                <label htmlFor="category">Category <span style={{ color: 'red' }}>*</span></label>
                 <select id="category" value={formData.category} onChange={handleInputChange} required>
                   <option value="" disabled>Select Category</option>
                   <option value="Plumbing/Water Leak">🚰 Plumbing/Water Leak</option>
@@ -210,7 +220,7 @@ const RegisterComplaint = () => {
             <div className="form-group" style={{ marginBottom: '5px' }}>
               <div className="upload-container" style={{ background: 'var(--bg-main)', border: '2px dashed var(--border-color)', borderRadius: '12px', padding: '15px' }}>
                 <label htmlFor="images" className="custom-file-upload" style={{ background: 'var(--primary)', border: 'none' }}>
-                  <span>Upload Image</span>
+                  <span>{formData.requestType === 'Certificate Application' ? 'Upload Documents (Images)' : 'Upload Image'}</span>
                 </label>
                 <input type="file" id="images" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
                 <div id="file-chosen" style={{ color: 'var(--text-secondary)', marginLeft: '10px', fontSize: '14px' }}>

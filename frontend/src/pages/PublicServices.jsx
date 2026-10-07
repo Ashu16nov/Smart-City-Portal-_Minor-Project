@@ -323,6 +323,41 @@ const PublicServices = () => {
                 </div>
               </div>
 
+              {/* Hospital Stats Section */}
+              {selectedService.category === 'Hospitals' && selectedService.hospitalStats && (
+                <div style={{ marginBottom: '30px', background: '#fff1f2', border: '1px solid #ffe4e6', borderRadius: '16px', padding: '20px' }}>
+                  <h4 style={{ fontSize: '16px', color: '#e11d48', margin: '0 0 15px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>🏥</span> Live Hospital Status
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+                    <div style={{ background: 'white', padding: '15px', borderRadius: '12px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '5px' }}>General Beds</div>
+                      <div style={{ fontSize: '24px', fontWeight: '900', color: selectedService.hospitalStats.availableBeds > 0 ? '#16a34a' : '#dc2626' }}>
+                        {selectedService.hospitalStats.availableBeds}
+                      </div>
+                    </div>
+                    <div style={{ background: 'white', padding: '15px', borderRadius: '12px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '5px' }}>ICU Beds</div>
+                      <div style={{ fontSize: '24px', fontWeight: '900', color: selectedService.hospitalStats.icuBeds > 0 ? '#16a34a' : '#dc2626' }}>
+                        {selectedService.hospitalStats.icuBeds}
+                      </div>
+                    </div>
+                  </div>
+                  {selectedService.hospitalStats.bloodBank && (
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '10px' }}>Blood Bank Availability</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {Object.entries(selectedService.hospitalStats.bloodBank).map(([bg, units]) => (
+                          <div key={bg} style={{ background: 'white', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', color: units > 0 ? '#e11d48' : '#94a3b8', border: `1px solid ${units > 0 ? '#fecdd3' : '#e2e8f0'}` }}>
+                            {bg.replace('_pos', '+').replace('_neg', '-')} : {units}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Arrays Info */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                 {selectedService.servicesOffered && selectedService.servicesOffered.length > 0 && (

@@ -89,3 +89,32 @@ exports.toggleImportance = async (req, res) => {
     res.status(500).json({ error: 'Failed to toggle importance' });
   }
 };
+
+// 7. RSVP for an event
+exports.rsvpEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const announcement = await Announcement.findById(id);
+    if (!announcement) return res.status(404).json({ error: 'Announcement not found' });
+    
+    if (announcement.category !== 'Events') {
+      return res.status(400).json({ error: 'This is not an event' });
+    }
+
+    if (announcement.attendees.includes(userId)) {
+      // Un-RSVP (cancel)
+      announcement.attendees = announcement.attendees.filter(attendeeId => attendeeId.toString() !== userId);
+    } else {
+      if (announcement.maxAttendees && announcement.attendees.length >= announcement.maxAttendees) {
+        return res.status(400).json({ error: 'Event is full' });
+      }
+      announcement.attendees.push(userId);
+    }
+
+    await announcement.save();
+    res.status(200).json(announcement);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to RSVP' });
+  }
+};

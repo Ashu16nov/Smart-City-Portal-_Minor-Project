@@ -4,16 +4,18 @@ const User = require('../models/User');
 const CAB_RATES = {
   'Mini': { baseFare: 40, perKmRate: 12 },
   'Sedan': { baseFare: 50, perKmRate: 15 },
-  'SUV': { baseFare: 70, perKmRate: 18 }
+  'SUV': { baseFare: 70, perKmRate: 18 },
+  'Metro Ticket': { baseFare: 20, perKmRate: 2 },
+  'Bus Pass': { baseFare: 500, perKmRate: 0 } // Flat rate for a pass
 };
 
 const cabBookingController = {
   createBooking: async (req, res) => {
     try {
-      const { pickup, destination, distance, cabType } = req.body;
+      const { pickup, destination, distance, cabType, transportMode, isPass, routeId } = req.body;
       const userId = req.user.id; 
 
-      if (!pickup || !destination || !distance || !cabType) {
+      if (!pickup || !destination || distance === undefined || !cabType) {
         return res.status(400).json({ error: 'All fields are required.' });
       }
 
@@ -52,7 +54,10 @@ const cabBookingController = {
         perKmRate,
         totalFare: calculatedTotalFare,
         status: 'BOOKED',
-        driver
+        transportMode: transportMode || 'Cab',
+        isPass: isPass || false,
+        routeId: routeId || '',
+        driver: transportMode === 'Cab' || !transportMode ? driver : undefined
       });
 
       await newBooking.save();

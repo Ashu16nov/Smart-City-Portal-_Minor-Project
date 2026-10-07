@@ -172,7 +172,7 @@ const DepartmentDashboard = () => {
                   <td style={{ padding: '14px', fontWeight: '800', color: '#0ea5e9' }}>{c.complaintId}</td>
                   <td style={{ padding: '14px' }}>
                     <strong style={{ color: '#0f172a' }}>{c.title}</strong>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>📍 {c.location || c.ward || 'Main Zone'}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>🏷️ {c.requestType} • {c.category} ({c.location || c.ward || 'Main Zone'})</div>
                   </td>
                   <td style={{ padding: '14px' }}>
                     <span style={{
